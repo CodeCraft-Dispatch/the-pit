@@ -1,0 +1,3 @@
+interface:
+  display_name: Engine Architecture
+  short_description: Keep The Pit process-centric, replayable, and extensible.
