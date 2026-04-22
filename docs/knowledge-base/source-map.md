@@ -1,6 +1,6 @@
 # Source Map
 
-This file records how the current repo seed was synthesized from the uploaded source materials in this chat.
+This file records the concepts, themes, and design inputs that informed the current repo seed.
 
 ## Game and narrative core
 
