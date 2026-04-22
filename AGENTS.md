@@ -39,7 +39,7 @@ Author content in domain language, not engine jargon.
 Use terms like:
 
 - room
-n- chamber
+- chamber
 - path
 - garden
 - relic
