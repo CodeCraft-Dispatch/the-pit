@@ -14,6 +14,7 @@ Preserve the identity of The Pit as a text-first, process-centric narrative puzz
 - Do not treat UI as garnish; journal, map, chat, and replay are part of play.
 - Do not confuse activity with meaningful progress.
 - Do not write lore that implies the world can be fully solved once and for all.
+- Do not accept a behavior change that bypasses executable examples, automated tests, mutation, or build visibility.
 
 ## Architectural stance
 
@@ -22,6 +23,17 @@ Preserve the identity of The Pit as a text-first, process-centric narrative puzz
 - Model the world in terms of views, commands, events, policies, feedback loops, and time.
 - Preserve a strict distinction between world truth and player-visible truth.
 - Keep event logs, replay, and contradiction timing first-class.
+- Prefer declarative, functional, reactive, and CUPID-aligned design.
+
+## Delivery stance
+
+- No behavior without executable specification first.
+- Default to red-green-refactor in thin slices.
+- Refactor only when the relevant tests are green.
+- Follow green automated tests with mutation testing at the nearest executable domain layer.
+- Represent the whole lead time in the GitHub delivery pipeline.
+- Never normalize a red build.
+- Reject paid tooling unless the doctrine is deliberately revised.
 
 ## Presentation stance
 
@@ -65,14 +77,20 @@ Check the knowledge base first:
 - `docs/knowledge-base/engine-architecture.md`
 - `docs/knowledge-base/content-system.md`
 - `docs/knowledge-base/persistence-and-replay.md`
+- `docs/knowledge-base/engineering-foundations.md`
+- `docs/knowledge-base/delivery-pipeline.md`
+- `docs/knowledge-base/security-standards.md`
 
 ## Preferred contribution pattern
 
 1. State the design pressure clearly.
-2. Identify which canon rule or engine constraint is involved.
-3. Propose the smallest change that preserves the game's identity.
-4. Update docs when the change affects canon, architecture, content semantics, or workflow.
-5. Keep language crisp and reusable.
+2. Identify which canon rule, engineering rule, or engine constraint is involved.
+3. Write the smallest executable example that proves the slice.
+4. Propose and implement the smallest change that preserves the game's identity.
+5. Refactor only while green.
+6. Run mutation before calling the slice done.
+7. Update docs when the change affects canon, architecture, content semantics, workflow, or security posture.
+8. Keep language crisp and reusable.
 
 ## Anti-patterns
 
@@ -81,7 +99,9 @@ Check the knowledge base first:
 - Replacing lawful contradiction with randomness.
 - Treating maps, notes, and traces as passive collectibles.
 - Writing agent guidance that duplicates the knowledge base instead of pointing to it.
+- Adding broad tests without mutation-backed domain assertions.
+- Letting the pipeline be advisory instead of authoritative.
 
 ## Definition of good work here
 
-Good work makes the project more legible, more extensible, and more faithful to its hidden thesis without flattening its mystery.
+Good work makes the project more legible, more extensible, more testable, and more faithful to its hidden thesis without flattening its mystery.
