@@ -1,21 +1,28 @@
-import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import {
+  cpSync,
+  mkdirSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
+import { join } from "node:path";
 
 const rootDir = process.cwd();
-const knowledgeBaseDir = join(rootDir, 'docs/knowledge-base');
-const specificationsDir = join(rootDir, 'specifications');
-const outputDir = join(rootDir, 'dist');
-const outputKnowledgeBaseDir = join(outputDir, 'knowledge-base');
-const outputSpecificationsDir = join(outputDir, 'specifications');
+const knowledgeBaseDir = join(rootDir, "docs/knowledge-base");
+const specificationsDir = join(rootDir, "specifications");
+const outputDir = join(rootDir, "dist");
+const outputKnowledgeBaseDir = join(outputDir, "knowledge-base");
+const outputSpecificationsDir = join(outputDir, "specifications");
 
 function collectFiles(directory, extension) {
   return readdirSync(directory, { recursive: true })
-    .filter((entry) => typeof entry === 'string' && entry.endsWith(extension))
+    .filter((entry) => typeof entry === "string" && entry.endsWith(extension))
     .sort();
 }
 
-const knowledgeBaseFiles = collectFiles(knowledgeBaseDir, '.md');
-const featureFiles = collectFiles(specificationsDir, '.feature');
+const knowledgeBaseFiles = collectFiles(knowledgeBaseDir, ".md");
+const featureFiles = collectFiles(specificationsDir, ".feature");
 
 rmSync(outputDir, { recursive: true, force: true });
 mkdirSync(outputKnowledgeBaseDir, { recursive: true });
@@ -26,14 +33,14 @@ cpSync(specificationsDir, outputSpecificationsDir, { recursive: true });
 
 const docLinks = knowledgeBaseFiles
   .map((file) => `<li><a href="knowledge-base/${file}">${file}</a></li>`)
-  .join('\n');
+  .join("\n");
 
 const featureLinks = featureFiles
   .map((file) => `<li><a href="specifications/${file}">${file}</a></li>`)
-  .join('\n');
+  .join("\n");
 
-const readme = readFileSync(join(rootDir, 'README.md'), 'utf8');
-const title = readme.match(/^#\s+(.+)$/m)?.[1] ?? 'The Pit';
+const readme = readFileSync(join(rootDir, "README.md"), "utf8");
+const title = readme.match(/^#\s+(.+)$/m)?.[1] ?? "The Pit";
 
 const html = `<!doctype html>
 <html lang="en">
@@ -62,5 +69,7 @@ const html = `<!doctype html>
 </html>
 `;
 
-writeFileSync(join(outputDir, 'index.html'), html, 'utf8');
-console.log(`Built knowledge-base site with ${knowledgeBaseFiles.length} documents and ${featureFiles.length} executable specification file(s).`);
+writeFileSync(join(outputDir, "index.html"), html, "utf8");
+console.log(
+  `Built knowledge-base site with ${knowledgeBaseFiles.length} documents and ${featureFiles.length} executable specification file(s).`,
+);

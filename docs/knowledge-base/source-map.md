@@ -5,6 +5,7 @@ This file records the concepts, themes, and design inputs that informed the curr
 ## Game and narrative core
 
 ### Hidden-Computability Narrative Puzzle Game
+
 Informed:
 
 - hidden thesis
@@ -15,6 +16,7 @@ Informed:
 - eight-phase progression model
 
 ### Story foundations and world canon notes
+
 Informed:
 
 - the city as a fractured civic ecology
@@ -23,6 +25,7 @@ Informed:
 - the need for factions and social consequence
 
 ### Canon sheet and engine-purpose notes
+
 Informed:
 
 - founding problem
@@ -35,6 +38,7 @@ Informed:
 ## Puzzle and campaign structure
 
 ### Design matrix, genre, throughline, and variability notes
+
 Informed:
 
 - flagship arcs
@@ -47,6 +51,7 @@ Informed:
 ## Technical architecture
 
 ### Game engine and game tech notes
+
 Informed:
 
 - world-process engine over physics-first engine
@@ -57,6 +62,7 @@ Informed:
 - local-first runtime stance
 
 ### Data-driven engine and save/persistence notes
+
 Informed:
 
 - code owns verbs, content owns authored sentences
@@ -68,6 +74,7 @@ Informed:
 ## Presentation strategy
 
 ### 2D strategies and representation notes
+
 Informed:
 
 - hybrid chat-plus-diagram recommendation
@@ -78,6 +85,7 @@ Informed:
 ## Software and systems modeling references
 
 ### System modeling, flow engineering, reactive principles, software overview, residuality, architecture philosophy, and guidebook notes
+
 Informed:
 
 - behavior-first system modeling

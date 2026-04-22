@@ -47,27 +47,35 @@ The player ends not with total control, but with wisdom about where action is me
 Use these as campaign-scale throughlines.
 
 ### The Broken District
+
 Opening promise arc. The player restores a wounded district and learns the world is lawful and worth touching.
 
 ### The Garden That Remembers
+
 Cultivation arc. The player learns that care can reveal truth, but that some growth only entangles.
 
 ### The Price of Foresight
+
 Oracle debt arc. The player is tempted to buy partial certainty and learns that prediction is costly.
 
 ### The Returning Atlas
+
 Cartography arc. Maps, traces, and representations begin to matter as much as routes themselves.
 
 ### The Schism of Stewards
+
 Political arc. Different factions embody incompatible methods for living with unfinished things.
 
 ### The Witness Who Learns You
+
 Companion arc. Another being begins to inherit, mirror, or suffer from the player's methods.
 
 ### The Margins Start Speaking
+
 Mirror arc. The world begins to quote the player's habits back to them.
 
 ### The Unfinished Engine
+
 Legacy arc. The player decides what should be opened, tended, sealed, abandoned, or passed on.
 
 ## Contradiction patterns

@@ -9,7 +9,7 @@
     "npm": ">=10"
   },
   "scripts": {
-    "format:check": "prettier --check \"**/*.{md,json,mjs,toml,yml,yaml,feature}\"",
+    "format:check": "prettier --check . --ignore-unknown",
     "lint:docs": "markdownlint-cli2 \"**/*.md\" \"!node_modules/**\" \"!dist/**\"",
     "lint:repo": "node ./tools/validate-repo.mjs",
     "spec:validate": "node ./tools/validate-features.mjs",
@@ -20,9 +20,7 @@
     "verify": "npm run format:check && npm run lint:docs && npm run lint:repo && npm run test && npm run test:mutation && npm run build"
   },
   "devDependencies": {
-    "@stryker-mutator/command-runner": "^8.7.1",
     "@stryker-mutator/core": "^8.7.1",
-    "@stryker-mutator/javascript-mutator": "^8.7.1",
     "markdownlint-cli2": "^0.14.0",
     "prettier": "^3.3.3"
   }
