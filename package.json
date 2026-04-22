@@ -1,0 +1,29 @@
+{
+  "name": "the-pit",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Zero-cost engineering foundations, delivery gates, and knowledge-base build tooling for The Pit.",
+  "type": "module",
+  "engines": {
+    "node": "22.x",
+    "npm": ">=10"
+  },
+  "scripts": {
+    "format:check": "prettier --check \"**/*.{md,json,mjs,toml,yml,yaml,feature}\"",
+    "lint:docs": "markdownlint-cli2 \"**/*.md\"",
+    "lint:repo": "node ./tools/validate-repo.mjs",
+    "spec:validate": "node ./tools/validate-features.mjs",
+    "test:knowledge": "node --test ./tools/tests/**/*.test.mjs",
+    "test": "npm run spec:validate && npm run test:knowledge",
+    "test:mutation": "stryker run",
+    "build": "node ./tools/build-knowledge-site.mjs",
+    "verify": "npm run format:check && npm run lint:docs && npm run lint:repo && npm run test && npm run test:mutation && npm run build"
+  },
+  "devDependencies": {
+    "@stryker-mutator/command-runner": "^8.7.1",
+    "@stryker-mutator/core": "^8.7.1",
+    "@stryker-mutator/javascript-mutator": "^8.7.1",
+    "markdownlint-cli2": "^0.14.0",
+    "prettier": "^3.3.3"
+  }
+}
