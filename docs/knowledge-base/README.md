@@ -2,7 +2,7 @@
 
 This directory is the current source-of-truth layer for The Pit.
 
-It is intentionally opinionated. These notes are not a loose brainstorm dump. They are meant to preserve the strongest form of the project across design, implementation, and future AI-assisted work.
+It is intentionally opinionated. These notes are not a loose brainstorm dump. They are meant to preserve the strongest form of the project across design, implementation, delivery, and future AI-assisted work.
 
 ## Reading order
 
@@ -14,8 +14,11 @@ It is intentionally opinionated. These notes are not a loose brainstorm dump. Th
 6. `engine-architecture.md` — runtime architecture and major abstractions
 7. `content-system.md` — DSL and authoring model
 8. `persistence-and-replay.md` — save, projections, replay, and migration strategy
-9. `authoring-roadmap.md` — practical staged build plan
-10. `source-map.md` — how the uploaded source materials map into this repo
+9. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
+10. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
+11. `security-standards.md` — OWASP-aligned security baseline and automation stance
+12. `authoring-roadmap.md` — practical staged build plan
+13. `source-map.md` — how the seeded materials map into this repo
 
 ## Intended use
 
@@ -25,6 +28,7 @@ Use these notes when you need to:
 - translate design theory into engine decisions
 - author new puzzle families or narrative arcs
 - evaluate whether a proposal fits the game
+- preserve delivery, testing, and security discipline while implementation grows
 - onboard another human or AI contributor quickly
 
 ## Rule of precedence
