@@ -1,10 +1,12 @@
-import { mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const rootDir = process.cwd();
 const knowledgeBaseDir = join(rootDir, 'docs/knowledge-base');
 const specificationsDir = join(rootDir, 'specifications');
 const outputDir = join(rootDir, 'dist');
+const outputKnowledgeBaseDir = join(outputDir, 'knowledge-base');
+const outputSpecificationsDir = join(outputDir, 'specifications');
 
 function collectFiles(directory, extension) {
   return readdirSync(directory, { recursive: true })
@@ -16,14 +18,18 @@ const knowledgeBaseFiles = collectFiles(knowledgeBaseDir, '.md');
 const featureFiles = collectFiles(specificationsDir, '.feature');
 
 rmSync(outputDir, { recursive: true, force: true });
-mkdirSync(outputDir, { recursive: true });
+mkdirSync(outputKnowledgeBaseDir, { recursive: true });
+mkdirSync(outputSpecificationsDir, { recursive: true });
+
+cpSync(knowledgeBaseDir, outputKnowledgeBaseDir, { recursive: true });
+cpSync(specificationsDir, outputSpecificationsDir, { recursive: true });
 
 const docLinks = knowledgeBaseFiles
-  .map((file) => `<li><a href="../docs/knowledge-base/${file}">${file}</a></li>`)
+  .map((file) => `<li><a href="knowledge-base/${file}">${file}</a></li>`)
   .join('\n');
 
 const featureLinks = featureFiles
-  .map((file) => `<li><a href="../specifications/${file}">${file}</a></li>`)
+  .map((file) => `<li><a href="specifications/${file}">${file}</a></li>`)
   .join('\n');
 
 const readme = readFileSync(join(rootDir, 'README.md'), 'utf8');
