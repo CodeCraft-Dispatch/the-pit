@@ -10,7 +10,7 @@
   },
   "scripts": {
     "format:check": "prettier --check \"**/*.{md,json,mjs,toml,yml,yaml,feature}\"",
-    "lint:docs": "markdownlint-cli2 \"**/*.md\"",
+    "lint:docs": "markdownlint-cli2 \"**/*.md\" \"!node_modules/**\" \"!dist/**\"",
     "lint:repo": "node ./tools/validate-repo.mjs",
     "spec:validate": "node ./tools/validate-features.mjs",
     "test:knowledge": "node --test ./tools/tests/**/*.test.mjs",
