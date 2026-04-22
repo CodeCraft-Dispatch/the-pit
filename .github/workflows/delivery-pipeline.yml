@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   group: delivery-pipeline-${{ github.ref }}
@@ -128,10 +127,11 @@ jobs:
             ];
             const pipelineIsGreen = results.every((result) => result === 'success');
 
-            const { data: issues } = await github.rest.issues.listForRepo({
+            const issues = await github.paginate(github.rest.issues.listForRepo, {
               owner,
               repo,
-              state: 'open'
+              state: 'open',
+              per_page: 100
             });
 
             const existing = issues.find((issue) => issue.title === title);

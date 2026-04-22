@@ -7,7 +7,6 @@ export const requiredPaths = [
   "package.json",
   "netlify.toml",
   "specifications/README.md",
-  "specifications/foundations/test-first-delivery.feature",
   "docs/knowledge-base/README.md",
   "docs/knowledge-base/engineering-foundations.md",
   "docs/knowledge-base/delivery-pipeline.md",
