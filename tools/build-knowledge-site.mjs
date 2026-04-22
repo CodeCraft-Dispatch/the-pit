@@ -7,13 +7,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { join } from "node:path";
-
-const rootDir = process.cwd();
-const knowledgeBaseDir = join(rootDir, "docs/knowledge-base");
-const specificationsDir = join(rootDir, "specifications");
-const outputDir = join(rootDir, "dist");
-const outputKnowledgeBaseDir = join(outputDir, "knowledge-base");
-const outputSpecificationsDir = join(outputDir, "specifications");
+import { pathToFileURL } from "node:url";
 
 function collectFiles(directory, extension) {
   return readdirSync(directory, { recursive: true })
@@ -21,28 +15,58 @@ function collectFiles(directory, extension) {
     .sort();
 }
 
-const knowledgeBaseFiles = collectFiles(knowledgeBaseDir, ".md");
-const featureFiles = collectFiles(specificationsDir, ".feature");
+export function toPosixPath(filePath) {
+  return filePath.replaceAll("\\", "/");
+}
 
-rmSync(outputDir, { recursive: true, force: true });
-mkdirSync(outputKnowledgeBaseDir, { recursive: true });
-mkdirSync(outputSpecificationsDir, { recursive: true });
+export function escapeHtml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
+}
 
-cpSync(knowledgeBaseDir, outputKnowledgeBaseDir, { recursive: true });
-cpSync(specificationsDir, outputSpecificationsDir, { recursive: true });
+export function encodePathForHref(filePath) {
+  return toPosixPath(filePath).split("/").map(encodeURIComponent).join("/");
+}
 
-const docLinks = knowledgeBaseFiles
-  .map((file) => `<li><a href="knowledge-base/${file}">${file}</a></li>`)
-  .join("\n");
+export function renderFileLink(prefix, filePath) {
+  const href = `${prefix}/${encodePathForHref(filePath)}`;
+  const label = escapeHtml(toPosixPath(filePath));
+  return `<li><a href="${href}">${label}</a></li>`;
+}
 
-const featureLinks = featureFiles
-  .map((file) => `<li><a href="specifications/${file}">${file}</a></li>`)
-  .join("\n");
+export function buildKnowledgeSite(rootDir = process.cwd()) {
+  const knowledgeBaseDir = join(rootDir, "docs/knowledge-base");
+  const specificationsDir = join(rootDir, "specifications");
+  const outputDir = join(rootDir, "dist");
+  const outputKnowledgeBaseDir = join(outputDir, "knowledge-base");
+  const outputSpecificationsDir = join(outputDir, "specifications");
 
-const readme = readFileSync(join(rootDir, "README.md"), "utf8");
-const title = readme.match(/^#\s+(.+)$/m)?.[1] ?? "The Pit";
+  const knowledgeBaseFiles = collectFiles(knowledgeBaseDir, ".md");
+  const featureFiles = collectFiles(specificationsDir, ".feature");
 
-const html = `<!doctype html>
+  rmSync(outputDir, { recursive: true, force: true });
+  mkdirSync(outputKnowledgeBaseDir, { recursive: true });
+  mkdirSync(outputSpecificationsDir, { recursive: true });
+
+  cpSync(knowledgeBaseDir, outputKnowledgeBaseDir, { recursive: true });
+  cpSync(specificationsDir, outputSpecificationsDir, { recursive: true });
+
+  const docLinks = knowledgeBaseFiles
+    .map((file) => renderFileLink("knowledge-base", file))
+    .join("\n");
+
+  const featureLinks = featureFiles
+    .map((file) => renderFileLink("specifications", file))
+    .join("\n");
+
+  const readme = readFileSync(join(rootDir, "README.md"), "utf8");
+  const title = escapeHtml(readme.match(/^#\s+(.+)$/m)?.[1] ?? "The Pit");
+
+  const html = `<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -69,7 +93,20 @@ const html = `<!doctype html>
 </html>
 `;
 
-writeFileSync(join(outputDir, "index.html"), html, "utf8");
-console.log(
-  `Built knowledge-base site with ${knowledgeBaseFiles.length} documents and ${featureFiles.length} executable specification file(s).`,
-);
+  writeFileSync(join(outputDir, "index.html"), html, "utf8");
+
+  return {
+    knowledgeBaseCount: knowledgeBaseFiles.length,
+    featureCount: featureFiles.length,
+  };
+}
+
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
+  const result = buildKnowledgeSite(process.cwd());
+  console.log(
+    `Built knowledge-base site with ${result.knowledgeBaseCount} documents and ${result.featureCount} executable specification file(s).`,
+  );
+}

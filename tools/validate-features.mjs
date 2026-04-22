@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { validateFeatureDocument } from "./lib/feature-grammar.mjs";
 
@@ -24,8 +24,12 @@ function collectFeatureFiles(rootDir) {
 }
 
 const rootDir = join(process.cwd(), "specifications");
-const featureFiles = collectFeatureFiles(rootDir);
 const errors = [];
+const featureFiles = existsSync(rootDir) ? collectFeatureFiles(rootDir) : [];
+
+if (!existsSync(rootDir)) {
+  errors.push("missing specifications directory: specifications");
+}
 
 for (const featureFile of featureFiles) {
   const source = readFileSync(featureFile, "utf8");

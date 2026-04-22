@@ -12,7 +12,7 @@ function seedRepository(rootDir) {
     "package.json": "{}\n",
     "netlify.toml": "[build]\n",
     "specifications/README.md": "# Specifications\n",
-    "specifications/foundations/test-first-delivery.feature":
+    "specifications/foundations/bootstrap.feature":
       "Feature: Delivery\n\nScenario: Green path\n  Given a slice\n  When we validate it\n  Then the contract passes\n",
     "docs/knowledge-base/README.md":
       "- engineering-foundations.md\n- delivery-pipeline.md\n- security-standards.md\n",
@@ -53,6 +53,22 @@ test("repository contract fails when required files are missing", () => {
     const result = validateRepoContract(rootDir);
     assert.equal(result.isValid, false);
     assert.match(result.errors[0], /missing required path: netlify.toml/);
+  } finally {
+    rmSync(rootDir, { recursive: true, force: true });
+  }
+});
+
+test("repository contract fails when specifications has no feature files", () => {
+  const rootDir = mkdtempSync(join(tmpdir(), "the-pit-contract-"));
+  try {
+    seedRepository(rootDir);
+    rmSync(join(rootDir, "specifications/foundations/bootstrap.feature"));
+    const result = validateRepoContract(rootDir);
+    assert.equal(result.isValid, false);
+    assert.match(
+      result.errors[0],
+      /specifications directory must contain at least one \.feature file/,
+    );
   } finally {
     rmSync(rootDir, { recursive: true, force: true });
   }
