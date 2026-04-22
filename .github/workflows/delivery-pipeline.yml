@@ -1,0 +1,172 @@
+name: delivery-pipeline
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - feat/**
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: delivery-pipeline-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  specification:
+    name: specification-and-contract
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run spec:validate
+      - run: npm run lint:repo
+
+  knowledge-base:
+    name: knowledge-base-quality
+    runs-on: ubuntu-latest
+    needs: specification
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint:docs
+
+  tests:
+    name: executable-tests
+    runs-on: ubuntu-latest
+    needs: knowledge-base
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test
+
+  mutation:
+    name: mutation-gate
+    runs-on: ubuntu-latest
+    needs: tests
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run test:mutation
+
+  build:
+    name: build-and-publish-surface
+    runs-on: ubuntu-latest
+    needs: mutation
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-base-site
+          path: dist
+
+  mainline-health:
+    name: mainline-health-reaction
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && always()
+    runs-on: ubuntu-latest
+    needs:
+      - specification
+      - knowledge-base
+      - tests
+      - mutation
+      - build
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          SPECIFICATION_RESULT: ${{ needs.specification.result }}
+          KNOWLEDGE_BASE_RESULT: ${{ needs.knowledge-base.result }}
+          TESTS_RESULT: ${{ needs.tests.result }}
+          MUTATION_RESULT: ${{ needs.mutation.result }}
+          BUILD_RESULT: ${{ needs.build.result }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const title = 'Mainline delivery pipeline is red';
+            const body = [
+              'The staged delivery pipeline failed on `main`.',
+              '',
+              `- specification-and-contract: ${process.env.SPECIFICATION_RESULT}`,
+              `- knowledge-base-quality: ${process.env.KNOWLEDGE_BASE_RESULT}`,
+              `- executable-tests: ${process.env.TESTS_RESULT}`,
+              `- mutation-gate: ${process.env.MUTATION_RESULT}`,
+              `- build-and-publish-surface: ${process.env.BUILD_RESULT}`,
+              '',
+              `Commit: ${context.sha}`
+            ].join('\n');
+
+            const results = [
+              process.env.SPECIFICATION_RESULT,
+              process.env.KNOWLEDGE_BASE_RESULT,
+              process.env.TESTS_RESULT,
+              process.env.MUTATION_RESULT,
+              process.env.BUILD_RESULT
+            ];
+            const pipelineIsGreen = results.every((result) => result === 'success');
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner,
+              repo,
+              state: 'open'
+            });
+
+            const existing = issues.find((issue) => issue.title === title);
+
+            if (!pipelineIsGreen) {
+              if (existing) {
+                await github.rest.issues.update({
+                  owner,
+                  repo,
+                  issue_number: existing.number,
+                  body
+                });
+              } else {
+                await github.rest.issues.create({
+                  owner,
+                  repo,
+                  title,
+                  body
+                });
+              }
+              return;
+            }
+
+            if (existing) {
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number: existing.number,
+                state: 'closed',
+                state_reason: 'completed',
+                body: `${body}\n\nRecovered on main.`
+              });
+            }
