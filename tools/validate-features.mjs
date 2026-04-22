@@ -25,9 +25,10 @@ function collectFeatureFiles(rootDir) {
 
 const rootDir = join(process.cwd(), "specifications");
 const errors = [];
-const featureFiles = existsSync(rootDir) ? collectFeatureFiles(rootDir) : [];
+const hasSpecificationsDir = existsSync(rootDir);
+const featureFiles = hasSpecificationsDir ? collectFeatureFiles(rootDir) : [];
 
-if (!existsSync(rootDir)) {
+if (!hasSpecificationsDir) {
   errors.push("missing specifications directory: specifications");
 }
 
