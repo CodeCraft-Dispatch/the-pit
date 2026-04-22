@@ -24,8 +24,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run spec:validate
       - run: npm run lint:repo
 
@@ -38,8 +37,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run format:check
       - run: npm run lint:docs
 
@@ -52,8 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run test
 
   mutation:
@@ -65,8 +62,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run test:mutation
 
   build:
@@ -78,8 +74,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version-file: .nvmrc
-          cache: npm
-      - run: npm ci
+      - run: npm install
       - run: npm run build
       - uses: actions/upload-artifact@v4
         with:
