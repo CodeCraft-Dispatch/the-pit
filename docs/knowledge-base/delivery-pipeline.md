@@ -14,6 +14,7 @@ Purpose:
 
 - no behavior without examples first
 - no silent drift in repo structure or engineering doctrine
+- validate the feature flag manifest and doctrine before runtime work can rely on it
 
 ### 2. Knowledge-base quality
 
@@ -32,6 +33,7 @@ Purpose:
 
 - preserve fast feedback
 - catch regressions before mutation and build
+- prove that feature flag resolution and override rules stay deterministic
 
 ### 4. Mutation gate
 
@@ -41,6 +43,7 @@ Purpose:
 
 - detect weak assertions
 - prevent false confidence from shallow tests
+- keep pure capability-gating logic honest
 
 ### 5. Build and publish surface
 
@@ -77,8 +80,9 @@ As the runtime grows, extend the same pipeline with:
 - integration tests
 - replay tests
 - content-pack validation
+- feature flag matrix smoke tests for critical combinations
 - security checks
 - performance budgets
 - accessibility verification
 
-Do not create a separate “real pipeline later.” This is the real pipeline, grown incrementally.
+Do not create a separate "real pipeline later." This is the real pipeline, grown incrementally.
