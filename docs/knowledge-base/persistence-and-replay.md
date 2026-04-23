@@ -22,10 +22,13 @@ Examples:
 - font and legibility settings
 - hint policy
 - symbolic vocabulary familiarity
+- player-exposed feature flags
 
 ### 2. Canonical world state
 
 The current durable state of rooms, paths, gardens, debts, factions, and process-bearing entities.
+
+This also includes world-level feature flags that lawfully gate modular arcs or authored surfaces for one save.
 
 ### 3. Semantic event log
 
@@ -53,6 +56,21 @@ Rebuildable views such as:
 - replay traces
 - faction stance summaries
 
+## Flag provenance and persistence
+
+Feature flag support must preserve provenance, not just final values.
+
+At minimum, retain:
+
+- manifest version
+- active non-default build overrides
+- active non-default world overrides
+- active non-default profile overrides
+- the resolved boot snapshot passed into the engine or kernel when relevant
+
+Session and test overrides are intentionally ephemeral.
+They should never be written back as profile or world truth unless a deliberate save action converts them.
+
 ## Replay stance
 
 Replay is not a luxury.
@@ -63,6 +81,7 @@ The game needs replay because it is about:
 - apparent progress versus meaningful progress
 - delayed contradiction
 - traceable consequence
+- capability gates that affected what the player could perceive or enter
 
 At minimum, keep a semantic replay stream even if the world is not fully event-sourced.
 
@@ -73,7 +92,8 @@ Every save should store:
 - engine version
 - content-pack versions
 - migration stamp
-- feature flags if needed
+- feature flag manifest version
+- relevant non-default feature flag overrides
 
 The game is meant to grow over time, so save migration is part of architecture, not a cleanup problem for later.
 
