@@ -18,6 +18,7 @@ Owns browser-facing responsibilities:
 - worker orchestration
 - rendering adapters
 - input, audio, DOM, accessibility
+- feature flag manifest loading and boot snapshot assembly
 
 ### 2. Simulation kernel
 
@@ -30,6 +31,7 @@ Owns:
 - topology engine
 - snapshot and replay hooks
 - optional physics port
+- immutable consumption of boot-time kernel capability flags
 
 ### 3. Domain runtime
 
@@ -43,10 +45,13 @@ Owns:
 - contradiction controller
 - self-reference controller
 - faction or civic ecology state
+- pure feature flag query service
 
 ### 4. Content model
 
 Declarative authored content that describes rooms, gardens, paths, relics, oracle bargains, mirror rules, and progression gates.
+
+It may also declare lawful flag gates for modular arcs or experimental surfaces.
 
 ### 5. Tools and pipeline
 
@@ -58,6 +63,28 @@ Owns:
 - replay debugger
 - balancing telemetry
 - validation and migration tooling
+- feature flag manifest validation and matrix support
+
+## Feature flag stance
+
+Feature flags are a local-first runtime service, not a remote control plane.
+
+Resolve them in a stable order:
+
+1. manifest defaults
+2. build and platform capability gates
+3. world and content-pack gates
+4. profile and preference overrides
+5. session and test overrides
+
+### Placement rule
+
+- The platform shell loads the manifest and composes a boot snapshot.
+- The domain runtime exposes a pure read-only query surface to the rest of the engine.
+- The content model may declare feature requirements without binding directly to a backend.
+- The Wasm kernel receives an immutable capability snapshot or bitset at boot.
+
+Do not let the kernel own flag persistence, profile preference storage, or remote lookup behavior.
 
 ## Missing abstractions that matter most
 
@@ -114,6 +141,6 @@ Do not let spectacle physics become the organizing principle.
 
 When in doubt, ask:
 
-Is this feature better described as a process, a knowledge boundary, a commitment cost, a representation rule, or a spatial event?
+Is this feature better described as a process, a knowledge boundary, a commitment cost, a representation rule, a capability gate, or a spatial event?
 
 If it is not fundamentally spatial, it should not live in the physics layer.
