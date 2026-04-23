@@ -20,6 +20,7 @@ Stable semantics should remain in code:
 - diagnostics
 - rendering adapters
 - interpreter behavior
+- feature flag resolution and provenance
 
 ## What belongs in authored content
 
@@ -35,6 +36,7 @@ Mutable world and narrative situations should live in content:
 - reveal thresholds
 - copy and symbols
 - narrative unlock conditions
+- lawful feature flag requirements for modular additions
 
 ## Preferred modeling language
 
@@ -49,6 +51,7 @@ Author content in domain language:
 - closures
 - unlocks
 - contradictions
+- feature requirements
 
 ## Example shape
 
@@ -56,6 +59,10 @@ Author content in domain language:
 id: archive.room.014
 family: archive_room
 arc: patterning
+
+flags:
+  requires:
+    - content.arc.mirrorDistrict
 
 views:
   entry:
@@ -96,6 +103,7 @@ Useful capability areas include:
 - contradiction trigger
 - replay surface
 - semantic map projection
+- feature flag gate
 
 This keeps authored content portable while the runtime evolves.
 
@@ -110,6 +118,7 @@ Every content beat should define:
 - what counts as progress
 - how it closes
 - how contradiction can target the learned method
+- which lawful feature requirements gate its availability
 
 ## Anti-patterns
 
@@ -117,6 +126,7 @@ Every content beat should define:
 - encoding scheduler logic in content
 - writing mini-programs in the DSL to compensate for missing engine semantics
 - allowing every room to invent its own private ontology
+- hiding broken semantics behind ad hoc feature flags
 
 ## Goal
 
