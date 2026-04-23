@@ -98,6 +98,21 @@ Player notes, inscriptions, diagrams, oracle rulings, and replay traces should b
 
 This is central, not ornamental. Representation itself is part of play in The Pit.
 
+## Player-facing feature flags
+
+A settings or preferences surface may expose a small player-safe subset of flags.
+
+That surface should:
+
+- live with profile-backed preferences rather than main HUD urgency
+- expose only flags explicitly marked as player-facing
+- explain the effect in player language
+- avoid kernel, migration, or hidden content internals
+- preserve lawful save behavior when toggled
+
+Good candidates are representation and preference surfaces.
+Bad candidates are low-level engine toggles that can corrupt a world or invalidate replay assumptions.
+
 ## Commitment verbs
 
 The interface must make continuation and abandonment meaningful.
