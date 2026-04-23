@@ -6,7 +6,7 @@ const resolutionOrder = ["build", "world", "profile", "session"];
 function normalizeFlag(flag) {
   return {
     ...flag,
-    requires: Array.isArray(flag.requires) ? flag.requires : [],
+    requires: flag.requires === undefined ? [] : flag.requires,
     testable: flag.testable ?? true,
   };
 }
@@ -127,6 +127,9 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
   for (const [index, rawFlag] of (manifest.flags ?? []).entries()) {
     const prefix = `${path}: flags[${index}]`;
     const flag = normalizeFlag(rawFlag);
+    if (!Array.isArray(flag.requires)) {
+      continue;
+    }
     for (const requirement of flag.requires) {
       if (!flagsById.has(requirement)) {
         errors.push(`${prefix}: requires unknown flag \"${requirement}\"`);
