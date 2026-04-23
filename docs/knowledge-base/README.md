@@ -13,12 +13,13 @@ It is intentionally opinionated. These notes are not a loose brainstorm dump. Th
 5. `experience-and-ui.md` — player-facing representation strategy
 6. `engine-architecture.md` — runtime architecture and major abstractions
 7. `content-system.md` — DSL and authoring model
-8. `persistence-and-replay.md` — save, projections, replay, and migration strategy
-9. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
-10. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
-11. `security-standards.md` — OWASP-aligned security baseline and automation stance
-12. `authoring-roadmap.md` — practical staged build plan
-13. `source-map.md` — how the seeded materials map into this repo
+8. `feature-flags.md` — local-first flag taxonomy, resolution, and runtime placement
+9. `persistence-and-replay.md` — save, projections, replay, and migration strategy
+10. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
+11. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
+12. `security-standards.md` — OWASP-aligned security baseline and automation stance
+13. `authoring-roadmap.md` — practical staged build plan
+14. `source-map.md` — how the seeded materials map into this repo
 
 ## Intended use
 
@@ -27,6 +28,7 @@ Use these notes when you need to:
 - preserve canon while adding features or content
 - translate design theory into engine decisions
 - author new puzzle families or narrative arcs
+- define lawful capability gates without adding remote control-plane drift
 - evaluate whether a proposal fits the game
 - preserve delivery, testing, and security discipline while implementation grows
 - onboard another human or AI contributor quickly
