@@ -6,7 +6,7 @@ const resolutionOrder = ["build", "world", "profile", "session"];
 function normalizeFlag(flag) {
   return {
     ...flag,
-    requires: flag.requires === undefined ? [] : flag.requires,
+    requires: Array.isArray(flag.requires) ? flag.requires : [],
     testable: flag.testable ?? true,
   };
 }
@@ -89,10 +89,10 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
       errors.push(`${prefix}: testable must be a boolean when provided`);
     }
 
-    if (!Array.isArray(flag.requires)) {
+    if (rawFlag.requires !== undefined && !Array.isArray(rawFlag.requires)) {
       errors.push(`${prefix}: requires must be an array when provided`);
     } else {
-      for (const requirement of flag.requires) {
+      for (const requirement of rawFlag.requires ?? []) {
         if (
           typeof requirement !== "string" ||
           requirement.trim().length === 0
@@ -126,15 +126,14 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
   const flagsById = indexFeatureFlags(manifest);
   for (const [index, rawFlag] of (manifest.flags ?? []).entries()) {
     const prefix = `${path}: flags[${index}]`;
-    const flag = normalizeFlag(rawFlag);
-    if (!Array.isArray(flag.requires)) {
+    if (rawFlag.requires !== undefined && !Array.isArray(rawFlag.requires)) {
       continue;
     }
-    for (const requirement of flag.requires) {
+    for (const requirement of rawFlag.requires ?? []) {
       if (!flagsById.has(requirement)) {
         errors.push(`${prefix}: requires unknown flag \"${requirement}\"`);
       }
-      if (requirement === flag.id) {
+      if (requirement === rawFlag.id) {
         errors.push(`${prefix}: a flag cannot require itself`);
       }
     }
