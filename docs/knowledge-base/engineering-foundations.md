@@ -48,6 +48,7 @@ Use the smallest effective mix of automated tests:
 - integration tests for persistence, projections, and runtime services
 - replay tests for time and contradiction behavior
 - content validation tests for authored data
+- feature flag manifest and resolution tests for capability gating
 - accessibility, performance, and security checks where relevant
 
 ## Mutation rule
@@ -60,8 +61,22 @@ Practical interpretation:
 - the corresponding domain logic must survive a mutation gate
 - unit and property tests are followed directly by mutation
 - integration and replay tests require mutation of the domain or service code they exercise
+- feature flag evaluation logic must survive mutation at the pure resolution layer
 
 Do not use broad end-to-end mutation as an excuse to skip domain-level mutation.
+
+## Feature flag doctrine
+
+Feature flags must remain local-first, zero-cost, and semantically honest.
+
+That means:
+
+- no paid or hosted flag control plane
+- every new flag gets an executable example, manifest entry, validation, and tests
+- flags stage or expose capability; they do not replace missing architecture
+- player-facing flags must be profile-backed and safe to toggle
+- session and test overrides must stay ephemeral unless deliberately persisted
+- expired or fully adopted flags should be removed instead of living forever
 
 ## Build health rule
 
