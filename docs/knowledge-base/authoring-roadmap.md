@@ -18,6 +18,7 @@ Build the smallest viable runtime with:
 - semantic event log
 - journal and map projection shell
 - content loader for a first-pass DSL
+- local-first feature flag manifest and resolution service
 
 ## M2 — First playable district
 
@@ -33,6 +34,8 @@ Author one compact district made of:
 Goal:
 Prove the game's central loop before scaling content breadth.
 
+Use world-level content flags only to gate modular additions, not to replace missing semantics.
+
 ## M3 — Representation as play
 
 Add the player-facing instruments that make the game special:
@@ -42,6 +45,7 @@ Add the player-facing instruments that make the game special:
 - replay trace view
 - thread list and commitment panel
 - contradiction and debt surfacing
+- player-safe preference and feature flag surfaces where justified
 
 ## M4 — Progression and contradiction service
 
@@ -69,6 +73,7 @@ Build the authoring and debugging infrastructure:
 - migration tests
 - content-pack versioning
 - saved-world compatibility checks
+- feature flag manifest validation and critical matrix tests
 
 ## Working rule
 
