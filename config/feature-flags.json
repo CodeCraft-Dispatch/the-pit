@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "flags": [
+    {
+      "id": "engine.runtime.featureFlags",
+      "kind": "engine",
+      "description": "Enable the local-first feature flag evaluation service across the platform shell and domain runtime.",
+      "default": true,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "tags": ["runtime", "foundations"]
+    },
+    {
+      "id": "ui.playerSettings.flagsPanel",
+      "kind": "ui",
+      "description": "Expose a player-safe feature flag panel for profile-backed preferences and experiments.",
+      "default": false,
+      "exposure": "player",
+      "persistence": "profile",
+      "mutableAtRuntime": true,
+      "testable": true,
+      "requires": ["engine.runtime.featureFlags"],
+      "tags": ["settings", "preferences"]
+    },
+    {
+      "id": "content.arc.mirrorDistrict",
+      "kind": "content",
+      "description": "Enable a modular mirror-district content slice once the authored pack exists.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "world",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["engine.runtime.featureFlags"],
+      "tags": ["content-pack", "arc"]
+    },
+    {
+      "id": "kernel.wasm.processCore",
+      "kind": "kernel",
+      "description": "Boot the deterministic Wasm process kernel when the platform supports it.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["engine.runtime.featureFlags"],
+      "tags": ["wasm", "kernel"]
+    }
+  ]
+}
