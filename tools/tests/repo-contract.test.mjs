@@ -11,7 +11,7 @@ function seedRepository(rootDir) {
     "AGENTS.md": "# AGENTS\n",
     "package.json": "{}\n",
     "netlify.toml": "[build]\n",
-    "config/feature-flags.json": "{\"version\":1,\"flags\":[]}\n",
+    "config/feature-flags.json": '{"version":1,"flags":[]}\n',
     "specifications/README.md": "# Specifications\n",
     "specifications/foundations/bootstrap.feature":
       "Feature: Delivery\n\nScenario: Green path\n  Given a slice\n  When we validate it\n  Then the contract passes\n",

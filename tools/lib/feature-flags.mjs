@@ -53,10 +53,15 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
     }
 
     if (!validKinds.has(flag.kind)) {
-      errors.push(`${prefix}: kind must be one of ${Array.from(validKinds).join(", ")}`);
+      errors.push(
+        `${prefix}: kind must be one of ${Array.from(validKinds).join(", ")}`,
+      );
     }
 
-    if (typeof flag.description !== "string" || flag.description.trim().length === 0) {
+    if (
+      typeof flag.description !== "string" ||
+      flag.description.trim().length === 0
+    ) {
       errors.push(`${prefix}: description must be a non-empty string`);
     }
 
@@ -65,7 +70,9 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
     }
 
     if (!validExposure.has(flag.exposure)) {
-      errors.push(`${prefix}: exposure must be one of ${Array.from(validExposure).join(", ")}`);
+      errors.push(
+        `${prefix}: exposure must be one of ${Array.from(validExposure).join(", ")}`,
+      );
     }
 
     if (!validPersistence.has(flag.persistence)) {
@@ -86,14 +93,19 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
       errors.push(`${prefix}: requires must be an array when provided`);
     } else {
       for (const requirement of flag.requires) {
-        if (typeof requirement !== "string" || requirement.trim().length === 0) {
+        if (
+          typeof requirement !== "string" ||
+          requirement.trim().length === 0
+        ) {
           errors.push(`${prefix}: requires entries must be non-empty strings`);
         }
       }
     }
 
     if (flag.exposure === "player" && flag.persistence !== "profile") {
-      errors.push(`${prefix}: player-exposed flags must persist in profile state`);
+      errors.push(
+        `${prefix}: player-exposed flags must persist in profile state`,
+      );
     }
 
     if (flag.exposure === "player" && flag.mutableAtRuntime !== true) {
@@ -101,7 +113,9 @@ export function validateFeatureFlagManifest(manifest, options = {}) {
     }
 
     if (flag.persistence === "build" && flag.mutableAtRuntime === true) {
-      errors.push(`${prefix}: build-persistent flags cannot be mutable at runtime`);
+      errors.push(
+        `${prefix}: build-persistent flags cannot be mutable at runtime`,
+      );
     }
 
     if (flag.kind === "kernel" && flag.exposure === "player") {
@@ -154,7 +168,9 @@ function enforceRequirements(values, provenance, flagsById) {
         continue;
       }
 
-      const missing = flag.requires.filter((requirement) => values[requirement] !== true);
+      const missing = flag.requires.filter(
+        (requirement) => values[requirement] !== true,
+      );
       if (missing.length === 0) {
         continue;
       }
@@ -170,7 +186,9 @@ function enforceRequirements(values, provenance, flagsById) {
 }
 
 export function resolveFeatureFlags(manifest, layers = {}) {
-  const validation = validateFeatureFlagManifest(manifest, { path: "feature-flags" });
+  const validation = validateFeatureFlagManifest(manifest, {
+    path: "feature-flags",
+  });
   if (!validation.isValid) {
     throw new Error(validation.errors.join("\n"));
   }

@@ -74,7 +74,10 @@ test("player-exposed flag must persist in profile state", () => {
   });
 
   assert.equal(result.isValid, false);
-  assert.match(result.errors[0], /player-exposed flags must persist in profile state/);
+  assert.match(
+    result.errors[0],
+    /player-exposed flags must persist in profile state/,
+  );
 });
 
 test("flag resolution applies deterministic override precedence", () => {
@@ -134,5 +137,8 @@ test("dependencies disable flags whose requirements are not enabled", () => {
   assert.equal(resolved.values["kernel.wasm.processCore"], false);
   assert.equal(resolved.values["ui.playerSettings.flagsPanel"], false);
   assert.equal(resolved.values["content.arc.mirrorDistrict"], false);
-  assert.equal(resolved.provenance["kernel.wasm.processCore"].source, "dependency");
+  assert.equal(
+    resolved.provenance["kernel.wasm.processCore"].source,
+    "dependency",
+  );
 });
