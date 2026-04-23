@@ -20,11 +20,11 @@ if (existsSync(manifestPath)) {
 }
 
 if (errors.length > 0) {
-  console.error("Repository contract failed:\n");
+  console.error("Repository validation failed:\n");
   for (const error of errors) {
     console.error(`- ${error}`);
   }
   process.exit(1);
 }
 
-console.log("Repository contract is satisfied.");
+console.log("Repository validation is satisfied.");

@@ -80,6 +80,18 @@ test("player-exposed flag must persist in profile state", () => {
   );
 });
 
+test("requires must be an array when provided", () => {
+  const manifest = createManifest();
+  manifest.flags[1].requires = "engine.runtime.featureFlags";
+
+  const result = validateFeatureFlagManifest(manifest, {
+    path: "config/feature-flags.json",
+  });
+
+  assert.equal(result.isValid, false);
+  assert.match(result.errors[0], /requires must be an array when provided/);
+});
+
 test("flag resolution applies deterministic override precedence", () => {
   const resolved = resolveFeatureFlags(createManifest(), {
     build: {
