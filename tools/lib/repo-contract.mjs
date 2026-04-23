@@ -6,9 +6,11 @@ export const requiredPaths = [
   "AGENTS.md",
   "package.json",
   "netlify.toml",
+  "config/feature-flags.json",
   "specifications/README.md",
   "docs/knowledge-base/README.md",
   "docs/knowledge-base/engineering-foundations.md",
+  "docs/knowledge-base/feature-flags.md",
   "docs/knowledge-base/delivery-pipeline.md",
   "docs/knowledge-base/security-standards.md",
   "codex/instructions/engineering-workflow.md",
@@ -32,6 +34,7 @@ export function validateRepoContract(rootDir = process.cwd()) {
     const kbReadme = readFileSync(kbReadmePath, "utf8");
     for (const requiredReference of [
       "engineering-foundations.md",
+      "feature-flags.md",
       "delivery-pipeline.md",
       "security-standards.md",
     ]) {
