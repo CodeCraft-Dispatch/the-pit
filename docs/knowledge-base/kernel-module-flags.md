@@ -82,7 +82,7 @@ Kernel flags must not be player-exposed. A player may choose presentation prefer
 1. Manifest defaults are loaded.
 2. Platform capability checks run.
 3. Build-level overrides are applied.
-4. World, profile, and session layers resolve as allowed by the general feature flag rules.
+4. World, session, and test layers may resolve when explicitly allowed pre-boot; profile overrides do not apply to kernel flags.
 5. Requirements are enforced.
 6. The platform shell assembles the boot snapshot.
 7. The Wasm kernel receives an immutable capability bitset or snapshot.
