@@ -10,8 +10,11 @@
   },
   "scripts": {
     "format:check": "prettier --check . --ignore-unknown",
+    "lint:commit-msg": "commitlint --edit",
+    "lint:commits": "commitlint --from=${COMMITLINT_FROM:-HEAD~1} --to=${COMMITLINT_TO:-HEAD} --verbose",
     "lint:docs": "markdownlint-cli2 \"**/*.md\" \"!node_modules/**\" \"!dist/**\"",
     "lint:repo": "node ./tools/validate-repo.mjs",
+    "hooks:install": "node ./tools/install-git-hooks.mjs",
     "spec:validate": "node ./tools/validate-features.mjs",
     "test:knowledge": "node --test ./tools/tests/**/*.test.mjs",
     "test": "npm run spec:validate && npm run test:knowledge",
@@ -20,6 +23,8 @@
     "verify": "npm run format:check && npm run lint:docs && npm run lint:repo && npm run test && npm run test:mutation && npm run build"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
     "@stryker-mutator/core": "^8.7.1",
     "markdownlint-cli2": "^0.14.0",
     "prettier": "^3.3.3"
