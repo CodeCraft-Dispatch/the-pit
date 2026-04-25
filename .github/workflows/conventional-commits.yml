@@ -42,7 +42,14 @@ jobs:
       - name: Validate squash-merge title
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
-        run: printf '%s\n' "$PR_TITLE" | npx --no -- commitlint --verbose
+        run: |
+          pr_title="$PR_TITLE"
+          if [[ "$pr_title" =~ ^\"(.*)\"$ ]]; then
+            pr_title="${BASH_REMATCH[1]}"
+          elif [[ "$pr_title" =~ ^\'(.*)\'$ ]]; then
+            pr_title="${BASH_REMATCH[1]}"
+          fi
+          printf '%s\n' "$pr_title" | npx --no-install commitlint --verbose
 
   commit-range:
     name: commit-message-range
