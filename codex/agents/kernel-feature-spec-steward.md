@@ -20,7 +20,7 @@ Use this agent when a change creates, updates, reviews, validates, or implements
 - `docs/knowledge-base/wasm-kernel-initial-feature-specs.md`
 - `docs/knowledge-base/engine-architecture.md`
 - `docs/knowledge-base/delivery-pipeline.md`
-- `codex/instructions/kernel-feature-spec-workflow.md`
+- `codex/instructions/wasm-kernel-feature-spec-workflow.md`
 - `AGENTS.md`
 
 ## Stewarding stance
