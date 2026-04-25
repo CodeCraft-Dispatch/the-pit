@@ -2,7 +2,9 @@ module.exports = {
   extends: ["@commitlint/config-conventional"],
   rules: {
     "body-leading-blank": [2, "always"],
+    "body-max-line-length": [0, "always", Infinity],
     "footer-leading-blank": [2, "always"],
+    "footer-max-line-length": [0, "always", Infinity],
     "header-max-length": [2, "always", 100],
     "scope-case": [2, "always", "kebab-case"],
     "subject-case": [

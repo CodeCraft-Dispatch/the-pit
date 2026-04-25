@@ -126,6 +126,14 @@ BREAKING CHANGE: replay snapshots must include capability provenance.
 6. Add footers for issues, reviewers, or breaking changes.
 7. Validate before committing.
 
+## Line length rules
+
+The header is limited to 100 characters (`header-max-length`).
+
+Body and footer lines have **no enforced maximum length** (`body-max-line-length` and `footer-max-line-length` are disabled). This is intentional: machine-generated footers such as `Agent-Logs-Url:`, `Co-authored-by:`, `Refs:`, and URLs routinely exceed 100 characters. Wrapping them would corrupt their semantic value.
+
+Keep body prose lines under 100 characters as a human-readability convention even though the linter does not enforce it.
+
 ## Local validation
 
 Install the local Git hook:
