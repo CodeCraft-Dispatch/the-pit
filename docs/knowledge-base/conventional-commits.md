@@ -20,19 +20,19 @@ The header is mandatory. The body and footer are optional. When they exist, sepa
 
 Use the smallest type that accurately describes the change.
 
-| Type | Use when |
-| --- | --- |
-| `feat` | The commit adds a user-visible, author-visible, runtime-visible, or capability-visible feature. |
-| `fix` | The commit corrects broken behavior. |
-| `docs` | The commit changes documentation, canon, prompts, instructions, agents, or skills without changing runtime behavior. |
-| `test` | The commit adds or changes tests, executable examples, fixtures, specifications, or mutation-test support. |
-| `refactor` | The commit restructures code without changing behavior or fixing a bug. |
-| `perf` | The commit improves performance without changing intended behavior. |
-| `build` | The commit changes package dependencies, build scripts, generated build surfaces, or local developer tooling. |
-| `ci` | The commit changes GitHub Actions, deployment automation, or pipeline behavior. |
-| `style` | The commit changes formatting only. |
-| `chore` | The commit performs repository maintenance that does not fit the other types. |
-| `revert` | The commit reverts a previous commit. |
+| Type       | Use when                                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- |
+| `feat`     | The commit adds a user-visible, author-visible, runtime-visible, or capability-visible feature.                      |
+| `fix`      | The commit corrects broken behavior.                                                                                 |
+| `docs`     | The commit changes documentation, canon, prompts, instructions, agents, or skills without changing runtime behavior. |
+| `test`     | The commit adds or changes tests, executable examples, fixtures, specifications, or mutation-test support.           |
+| `refactor` | The commit restructures code without changing behavior or fixing a bug.                                              |
+| `perf`     | The commit improves performance without changing intended behavior.                                                  |
+| `build`    | The commit changes package dependencies, build scripts, generated build surfaces, or local developer tooling.        |
+| `ci`       | The commit changes GitHub Actions, deployment automation, or pipeline behavior.                                      |
+| `style`    | The commit changes formatting only.                                                                                  |
+| `chore`    | The commit performs repository maintenance that does not fit the other types.                                        |
+| `revert`   | The commit reverts a previous commit.                                                                                |
 
 ## Recommended scopes
 

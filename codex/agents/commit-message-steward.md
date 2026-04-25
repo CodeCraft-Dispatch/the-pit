@@ -46,13 +46,13 @@ A good commit message is a small contract with future maintainers. It should mak
 
 ## Common corrections
 
-| Weak message | Better message |
-| --- | --- |
-| `updates` | `docs(commit): add conventional commits policy` |
-| `fix bug` | `fix(replay): preserve capability provenance` |
-| `add docs` | `docs(kernel): document module flag lifecycle` |
-| `changes from review` | `refactor(content): separate closure rules from room data` |
-| `wip` | Do not commit. Continue working or create a focused commit. |
+| Weak message          | Better message                                              |
+| --------------------- | ----------------------------------------------------------- |
+| `updates`             | `docs(commit): add conventional commits policy`             |
+| `fix bug`             | `fix(replay): preserve capability provenance`               |
+| `add docs`            | `docs(kernel): document module flag lifecycle`              |
+| `changes from review` | `refactor(content): separate closure rules from room data`  |
+| `wip`                 | Do not commit. Continue working or create a focused commit. |
 
 ## Escalate when
 
