@@ -39,6 +39,7 @@ Preserve the identity of The Pit as a text-first, process-centric narrative puzz
 - Reject paid tooling unless the doctrine is deliberately revised.
 - Use Conventional Commits for every commit, PR title intended for squash merge, release note seed, and agent-authored change summary.
 - Validate commit messages locally with `npm run lint:commit-msg -- --edit <commit-msg-file>` or across ranges with `npm run lint:commits` before treating delivery work as complete.
+- Run `npm run format:check` before every commit. Fix any violations with `npx prettier --write` and include the formatted files in the same commit.
 
 ## Presentation stance
 
@@ -113,6 +114,7 @@ Check the knowledge base first:
 - `docs/knowledge-base/delivery-pipeline.md`
 - `docs/knowledge-base/security-standards.md`
 - `docs/knowledge-base/conventional-commits.md`
+- `docs/knowledge-base/code-formatting.md`
 
 ## Preferred contribution pattern
 
