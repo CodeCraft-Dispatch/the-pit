@@ -79,14 +79,14 @@ Covers:
 
 ## Coverage matrix
 
-| Capability area         | Feature file                              |
-| ----------------------- | ----------------------------------------- |
-| Kernel contract         | `initial-wasm-kernel.feature`             |
-| Boot snapshot           | `boot-capability-snapshot.feature`        |
-| Fixed-step process core | `fixed-step-process-core.feature`         |
-| Scheduler and replay    | `scheduler-and-replay.feature`            |
-| Topology and constraints| `topology-and-constraints.feature`        |
-| Diagnostics and spatial | `diagnostics-and-spatial-fallback.feature`|
+| Capability area          | Feature file                               |
+| ------------------------ | ------------------------------------------ |
+| Kernel contract          | `initial-wasm-kernel.feature`              |
+| Boot snapshot            | `boot-capability-snapshot.feature`         |
+| Fixed-step process core  | `fixed-step-process-core.feature`          |
+| Scheduler and replay     | `scheduler-and-replay.feature`             |
+| Topology and constraints | `topology-and-constraints.feature`         |
+| Diagnostics and spatial  | `diagnostics-and-spatial-fallback.feature` |
 
 ## Authoring rules
 
