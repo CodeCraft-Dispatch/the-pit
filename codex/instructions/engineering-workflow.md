@@ -10,7 +10,8 @@ Use this instruction set when making engineering changes in The Pit.
 4. Implement the smallest change that turns the slice green.
 5. Refactor only while the suite is green.
 6. Run mutation testing before calling the slice complete.
-7. Build the knowledge or runtime surface and keep it releasable.
+7. Run `npm run format:check`; fix any violations with `npx prettier --write` before committing.
+8. Build the knowledge or runtime surface and keep it releasable.
 
 ## Mandatory preferences
 

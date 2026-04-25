@@ -22,6 +22,7 @@ Use this instruction set when making any substantive change in The Pit.
 - Prefer declarative authored content over hardcoded narrative branches.
 - Keep world truth and player-visible truth separate.
 - Keep representation surfaces first-class.
+- Run `npm run format:check` before every commit; fix violations with `npx prettier --write`.
 
 ## Documentation rule
 
