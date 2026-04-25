@@ -124,7 +124,10 @@ Good content declaration:
 
 ```json
 {
-  "requiresCapabilities": ["topology.regionMembership", "process.recurringState"]
+  "requiresCapabilities": [
+    "topology.regionMembership",
+    "process.recurringState"
+  ]
 }
 ```
 
@@ -159,15 +162,15 @@ Do not attempt full combinatorial coverage.
 
 Instead, maintain a small matrix:
 
-| Matrix case | Purpose |
-| --- | --- |
-| process core only | prove minimal kernel boots and replays |
-| process core + diagnostics | prove diagnostics do not change simulation semantics |
-| process core + snapshot replay | prove snapshot determinism |
-| process core + topology | prove graph and region capabilities are isolated |
-| process core + topology + constraints | prove combined puzzle substrate behavior |
-| disabled optional module | prove lawful degradation |
-| missing required module | prove boot rejection or content occlusion |
+| Matrix case                           | Purpose                                              |
+| ------------------------------------- | ---------------------------------------------------- |
+| process core only                     | prove minimal kernel boots and replays               |
+| process core + diagnostics            | prove diagnostics do not change simulation semantics |
+| process core + snapshot replay        | prove snapshot determinism                           |
+| process core + topology               | prove graph and region capabilities are isolated     |
+| process core + topology + constraints | prove combined puzzle substrate behavior             |
+| disabled optional module              | prove lawful degradation                             |
+| missing required module               | prove boot rejection or content occlusion            |
 
 Every new module should add one positive case and one disabled or rejected case.
 
