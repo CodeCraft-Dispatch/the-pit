@@ -12,14 +12,16 @@ It is intentionally opinionated. These notes are not a loose brainstorm dump. Th
 4. `puzzle-families.md` — reusable puzzle and content families
 5. `experience-and-ui.md` — player-facing representation strategy
 6. `engine-architecture.md` — runtime architecture and major abstractions
-7. `content-system.md` — DSL and authoring model
-8. `feature-flags.md` — local-first flag taxonomy, resolution, and runtime placement
-9. `persistence-and-replay.md` — save, projections, replay, and migration strategy
-10. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
-11. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
-12. `security-standards.md` — OWASP-aligned security baseline and automation stance
-13. `authoring-roadmap.md` — practical staged build plan
-14. `source-map.md` — how the seeded materials map into this repo
+7. `wasm-kernel.md` — deterministic WebAssembly kernel purpose, boundaries, modules, performance stance, and extension rules
+8. `kernel-module-flags.md` — boot-time kernel module flag taxonomy, dependency rules, replay provenance, and testing matrix
+9. `content-system.md` — DSL and authoring model
+10. `feature-flags.md` — local-first flag taxonomy, resolution, and runtime placement
+11. `persistence-and-replay.md` — save, projections, replay, and migration strategy
+12. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
+13. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
+14. `security-standards.md` — OWASP-aligned security baseline and automation stance
+15. `authoring-roadmap.md` — practical staged build plan
+16. `source-map.md` — how the seeded materials map into this repo
 
 ## Intended use
 
