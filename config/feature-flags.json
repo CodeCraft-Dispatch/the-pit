@@ -46,7 +46,79 @@
       "mutableAtRuntime": false,
       "testable": true,
       "requires": ["engine.runtime.featureFlags"],
-      "tags": ["wasm", "kernel"]
+      "tags": ["wasm", "kernel", "module"]
+    },
+    {
+      "id": "kernel.module.scheduler",
+      "kind": "kernel",
+      "description": "Enable deterministic scheduler queues, budgets, fairness, and deferred process work.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore"],
+      "tags": ["wasm", "kernel", "module", "scheduler"]
+    },
+    {
+      "id": "kernel.module.snapshotReplay",
+      "kind": "kernel",
+      "description": "Enable deterministic kernel snapshots, restore validation, and replay trace emission.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore"],
+      "tags": ["wasm", "kernel", "module", "replay"]
+    },
+    {
+      "id": "kernel.module.topology",
+      "kind": "kernel",
+      "description": "Enable deterministic graph, route, region, rewrite, reachability, and containment primitives.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore"],
+      "tags": ["wasm", "kernel", "module", "topology"]
+    },
+    {
+      "id": "kernel.module.constraints",
+      "kind": "kernel",
+      "description": "Enable deterministic occupancy, relation, threshold, lock, trigger, and reversible constraint primitives.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore", "kernel.module.topology"],
+      "tags": ["wasm", "kernel", "module", "constraints"]
+    },
+    {
+      "id": "kernel.module.diagnostics",
+      "kind": "kernel",
+      "description": "Enable hidden kernel counters and module health diagnostics without changing simulation semantics.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore"],
+      "tags": ["wasm", "kernel", "module", "diagnostics"]
+    },
+    {
+      "id": "kernel.spatialPort.basicQueries",
+      "kind": "kernel",
+      "description": "Enable optional basic spatial queries as a replaceable port subordinate to world-process semantics.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore", "kernel.module.topology"],
+      "tags": ["wasm", "kernel", "spatial-port"]
     }
   ]
 }
