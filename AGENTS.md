@@ -15,6 +15,7 @@ Preserve the identity of The Pit as a text-first, process-centric narrative puzz
 - Do not confuse activity with meaningful progress.
 - Do not write lore that implies the world can be fully solved once and for all.
 - Do not accept a behavior change that bypasses executable examples, automated tests, mutation, or build visibility.
+- Do not create, suggest, squash, merge, or approve a commit message that violates Conventional Commits 1.0.0.
 
 ## Architectural stance
 
@@ -36,6 +37,8 @@ Preserve the identity of The Pit as a text-first, process-centric narrative puzz
 - Represent the whole lead time in the GitHub delivery pipeline.
 - Never normalize a red build.
 - Reject paid tooling unless the doctrine is deliberately revised.
+- Use Conventional Commits for every commit, PR title intended for squash merge, release note seed, and agent-authored change summary.
+- Validate commit messages locally with `npm run lint:commit-msg -- --edit <commit-msg-file>` or across ranges with `npm run lint:commits` before treating delivery work as complete.
 
 ## Presentation stance
 
@@ -69,6 +72,31 @@ Use terms like:
 
 Avoid authoring content in terms of low-level update loops, timers, or backend-specific APIs.
 
+## Commit message stance
+
+All contributors and AI agents must follow `docs/knowledge-base/conventional-commits.md`.
+
+Use this form:
+
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Use `feat` only for user-visible or capability-visible additions. Use `fix` only for bug fixes. Mark breaking changes with `!` in the header or a `BREAKING CHANGE:` footer. Prefer focused commits that each explain one intent.
+
+Examples:
+
+```text
+feat(kernel): add boot-time capability snapshot
+fix(content): prevent oracle debt from bypassing commitment cost
+docs(canon): clarify unfinished engine cost model
+build(commit): add conventional commit validation
+```
+
 ## Before changing anything substantial
 
 Check the knowledge base first:
@@ -84,6 +112,7 @@ Check the knowledge base first:
 - `docs/knowledge-base/engineering-foundations.md`
 - `docs/knowledge-base/delivery-pipeline.md`
 - `docs/knowledge-base/security-standards.md`
+- `docs/knowledge-base/conventional-commits.md`
 
 ## Preferred contribution pattern
 
@@ -93,8 +122,9 @@ Check the knowledge base first:
 4. Propose and implement the smallest change that preserves the game's identity.
 5. Refactor only while green.
 6. Run mutation before calling the slice done.
-7. Update docs when the change affects canon, architecture, content semantics, workflow, or security posture.
-8. Keep language crisp and reusable.
+7. Update docs when the change affects canon, architecture, content semantics, workflow, security posture, or commit governance.
+8. Write the commit message using Conventional Commits before finalizing the change.
+9. Keep language crisp and reusable.
 
 ## Anti-patterns
 
@@ -107,6 +137,8 @@ Check the knowledge base first:
 - Letting the pipeline be advisory instead of authoritative.
 - Letting content files branch on raw kernel feature flag IDs.
 - Making kernel capability flags mutable during active simulation.
+- Using vague commit messages such as `updates`, `misc`, `changes`, `wip`, `fix stuff`, or `checkpoint`.
+- Mixing unrelated behavior, documentation, and infrastructure changes under one commit header.
 
 ## Definition of good work here
 
