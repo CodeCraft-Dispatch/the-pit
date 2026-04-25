@@ -11,7 +11,7 @@
   "scripts": {
     "format:check": "prettier --check . --ignore-unknown",
     "lint:commit-msg": "commitlint --edit",
-    "lint:commits": "commitlint --from=${COMMITLINT_FROM:-HEAD~1} --to=${COMMITLINT_TO:-HEAD} --verbose",
+    "lint:commits": "node ./tools/lint-commits.mjs",
     "lint:docs": "markdownlint-cli2 \"**/*.md\" \"!node_modules/**\" \"!dist/**\"",
     "lint:repo": "node ./tools/validate-repo.mjs",
     "hooks:install": "node ./tools/install-git-hooks.mjs",
