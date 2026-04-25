@@ -16,7 +16,7 @@ const hook = `#!/bin/sh
 # Installed by npm run hooks:install.
 # Enforces Conventional Commits for The Pit.
 
-npx --no -- commitlint --edit "$1"
+npx --no-install commitlint --edit "$1"
 `;
 
 writeFileSync(hookPath, hook, "utf8");
