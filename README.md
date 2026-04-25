@@ -15,18 +15,20 @@ This repository acts as the seed knowledge base, delivery contract, and zero-cos
 - Canon and worldbuilding that preserve the project's hidden thesis.
 - Engine and architecture notes for a process-centric, local-first, event-driven runtime.
 - Content-system guidance for declarative puzzle and narrative authoring.
-- Delivery, testing, mutation, and security doctrine that keeps implementation honest.
+- Delivery, testing, mutation, commit-governance, and security doctrine that keeps implementation honest.
 - Codex instructions, agents, and reusable skills that keep future work aligned.
 
 ## Repository map
 
 - `AGENTS.md` — repo-wide guidance for coding agents and future contributors.
 - `docs/knowledge-base/` — authoritative markdown knowledge base.
+- `docs/knowledge-base/conventional-commits.md` — commit-message policy for humans, AI agents, hooks, and CI.
 - `specifications/` — cucumber-like executable specifications for behavior slices.
 - `codex/instructions/` — repo-specific operating instructions for AI contributors.
 - `codex/agents/` — specialist agent briefs for design, architecture, and quality work.
 - `codex/skills/` — reusable skill bundles for disciplined slice delivery.
 - `.github/workflows/delivery-pipeline.yml` — staged pipeline covering specification through build health reaction.
+- `.github/workflows/conventional-commits.yml` — commit and squash-merge title validation.
 - `netlify.toml` — zero-cost Netlify configuration for preview and production knowledge surfaces.
 
 ## Core design pillars
@@ -46,7 +48,8 @@ This repository acts as the seed knowledge base, delivery contract, and zero-cos
 4. Represent the whole lead time in the delivery pipeline.
 5. Keep the build green and react automatically when mainline goes red.
 6. Prefer declarative, functional, reactive, and CUPID-aligned design.
-7. Reject tooling that introduces monetary cost unless the doctrine is revised deliberately.
+7. Use Conventional Commits for every commit and squash-merge title.
+8. Reject tooling that introduces monetary cost unless the doctrine is revised deliberately.
 
 ## Immediate implementation priorities
 
