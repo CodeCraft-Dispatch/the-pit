@@ -61,6 +61,17 @@ Informed:
 - five-layer architecture
 - local-first runtime stance
 
+### WebAssembly kernel doctrine
+
+Informed:
+
+- the kernel as deterministic simulation core rather than whole engine
+- module ownership for process core, scheduler, topology, constraints, snapshot/replay, diagnostics, and optional spatial query ports
+- boot-time kernel capability snapshots
+- kernel feature flags as immutable capability gates
+- zero-cost and browser-native constraints
+- deterministic replay and snapshot provenance requirements
+
 ### Data-driven engine and save/persistence notes
 
 Informed:
