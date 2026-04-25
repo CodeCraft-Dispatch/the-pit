@@ -42,13 +42,13 @@ The TypeScript platform shell should own browser integration. The domain runtime
 
 ## Layer ownership
 
-| Layer | Owns | Must not own |
-| --- | --- | --- |
-| Platform shell | boot, loading, workers, storage, rendering adapters, feature detection, flag snapshot assembly | process semantics |
+| Layer              | Owns                                                                                                                   | Must not own                                   |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Platform shell     | boot, loading, workers, storage, rendering adapters, feature detection, flag snapshot assembly                         | process semantics                              |
 | WebAssembly kernel | fixed clock, scheduler, module execution, topology primitives, snapshots, replay hooks, deterministic low-level events | profile state, remote lookup, narrative policy |
-| Domain runtime | process meaning, knowledge model, progression, contradiction, self-reference, flag queries | browser APIs or Wasm memory layout |
-| Content model | rooms, gardens, paths, oracle bargains, relics, gates, authored process definitions | runtime scheduling or persistence mechanics |
-| Tools and pipeline | compiler, validator, replay debugger, inspectors, test matrix, migration tools | player-facing play semantics |
+| Domain runtime     | process meaning, knowledge model, progression, contradiction, self-reference, flag queries                             | browser APIs or Wasm memory layout             |
+| Content model      | rooms, gardens, paths, oracle bargains, relics, gates, authored process definitions                                    | runtime scheduling or persistence mechanics    |
+| Tools and pipeline | compiler, validator, replay debugger, inspectors, test matrix, migration tools                                         | player-facing play semantics                   |
 
 ## Kernel boundary
 
