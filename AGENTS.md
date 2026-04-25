@@ -23,6 +23,8 @@ Preserve the identity of The Pit as a text-first, process-centric narrative puzz
 - Model the world in terms of views, commands, events, policies, feedback loops, and time.
 - Preserve a strict distinction between world truth and player-visible truth.
 - Keep event logs, replay, and contradiction timing first-class.
+- Treat the WebAssembly kernel as a deterministic simulation core, not as the whole engine or a browser integration layer.
+- Pass immutable boot-time capability snapshots into the kernel; never let the kernel resolve remote flags or own persistence.
 - Prefer declarative, functional, reactive, and CUPID-aligned design.
 
 ## Delivery stance
@@ -75,6 +77,8 @@ Check the knowledge base first:
 - `docs/knowledge-base/world-canon.md`
 - `docs/knowledge-base/narrative-and-progression.md`
 - `docs/knowledge-base/engine-architecture.md`
+- `docs/knowledge-base/wasm-kernel.md`
+- `docs/knowledge-base/kernel-module-flags.md`
 - `docs/knowledge-base/content-system.md`
 - `docs/knowledge-base/persistence-and-replay.md`
 - `docs/knowledge-base/engineering-foundations.md`
@@ -101,6 +105,8 @@ Check the knowledge base first:
 - Writing agent guidance that duplicates the knowledge base instead of pointing to it.
 - Adding broad tests without mutation-backed domain assertions.
 - Letting the pipeline be advisory instead of authoritative.
+- Letting content files branch on raw kernel feature flag IDs.
+- Making kernel capability flags mutable during active simulation.
 
 ## Definition of good work here
 
