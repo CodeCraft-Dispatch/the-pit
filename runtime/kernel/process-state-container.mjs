@@ -13,7 +13,13 @@ export const processStateNames = Object.freeze([
   "occluded",
 ]);
 
+export const processCommandTypes = Object.freeze([
+  "openProcess",
+  "setProcessState",
+]);
+
 export const validProcessStates = new Set(processStateNames);
+export const validProcessCommandTypes = new Set(processCommandTypes);
 
 const identifierPattern = /^[A-Za-z0-9._:-]+$/u;
 
@@ -83,6 +89,41 @@ export function buildProcessRecord(process) {
   };
 }
 
+export function normalizeProcessCommand(command) {
+  assertPlainObject(command, "command");
+
+  if (!validProcessCommandTypes.has(command.type)) {
+    throw new TypeError(`unsupported command type ${String(command.type)}`);
+  }
+
+  validateSafeIdentifier(command.id, "command.id");
+  validateSafeIdentifier(command.processId, "command.processId");
+
+  if (command.type === "setProcessState") {
+    if (!validProcessStates.has(command.state)) {
+      throw new TypeError(`unsupported process state ${String(command.state)}`);
+    }
+  }
+
+  return {
+    id: command.id,
+    processId: command.processId,
+    state: command.state,
+    type: command.type,
+  };
+}
+
+export function createCommandRejectedEvent(command, reason) {
+  return {
+    details: {
+      commandId: command.id ?? "unknown",
+      commandType: command.type ?? "unknown",
+      reason,
+    },
+    type: "CommandRejected",
+  };
+}
+
 export function sortProcessRecords(processes) {
   return [...processes].sort((left, right) =>
     compareStableStrings(left.id, right.id),
@@ -107,17 +148,6 @@ function copyProcess(process) {
   return { ...process };
 }
 
-function commandRejected(command, reason) {
-  return {
-    details: {
-      commandId: command.id ?? "unknown",
-      commandType: command.type ?? "unknown",
-      reason,
-    },
-    type: "CommandRejected",
-  };
-}
-
 export function createProcessStateContainer(processes = []) {
   const processMap = buildProcessMap(processes);
 
@@ -132,20 +162,19 @@ export function createProcessStateContainer(processes = []) {
   }
 
   function applyCommand(command) {
-    assertPlainObject(command, "command");
-
-    const process = processMap.get(command.processId);
+    const normalized = normalizeProcessCommand(command);
+    const process = processMap.get(normalized.processId);
     if (!process) {
-      return [commandRejected(command, "unknown-process")];
+      return [createCommandRejectedEvent(normalized, "unknown-process")];
     }
 
-    if (command.type === "openProcess") {
+    if (normalized.type === "openProcess") {
       if (process.state === "dormant" || process.state === "occluded") {
         process.state = "opened";
         return [
           {
             details: {
-              commandId: command.id,
+              commandId: normalized.id,
               processId: process.id,
               state: process.state,
             },
@@ -157,7 +186,7 @@ export function createProcessStateContainer(processes = []) {
       return [
         {
           details: {
-            commandId: command.id,
+            commandId: normalized.id,
             processId: process.id,
             state: process.state,
           },
@@ -166,21 +195,17 @@ export function createProcessStateContainer(processes = []) {
       ];
     }
 
-    if (command.type === "setProcessState") {
-      process.state = command.state;
-      return [
-        {
-          details: {
-            commandId: command.id,
-            processId: process.id,
-            state: process.state,
-          },
-          type: "ProcessStateSet",
+    process.state = normalized.state;
+    return [
+      {
+        details: {
+          commandId: normalized.id,
+          processId: process.id,
+          state: process.state,
         },
-      ];
-    }
-
-    return [commandRejected(command, `unsupported-command:${String(command.type)}`)];
+        type: "ProcessStateSet",
+      },
+    ];
   }
 
   function advanceProcesses() {
