@@ -8,8 +8,25 @@ import {
 
 export const SEMANTIC_EVENT_LOG_FLAG = "kernel.module.semanticEventLog";
 export const SEMANTIC_EVENT_LOG_SCHEMA_VERSION = 1;
+const JSON_SAFE_EVENT_DETAILS_ERROR =
+  "event.details values must be JSON-safe primitives, arrays, or plain objects";
 
 function cloneJsonValue(value) {
+  if (
+    value === null ||
+    typeof value === "string" ||
+    typeof value === "boolean"
+  ) {
+    return value;
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      throw new TypeError("event.details values must be finite numbers");
+    }
+    return value;
+  }
+
   if (Array.isArray(value)) {
     return value.map(cloneJsonValue);
   }
@@ -18,11 +35,15 @@ function cloneJsonValue(value) {
     return cloneSortedRecord(value);
   }
 
-  return value;
+  throw new TypeError(JSON_SAFE_EVENT_DETAILS_ERROR);
 }
 
 function cloneSortedRecord(record = {}) {
   assertPlainObject(record, "record");
+  const prototype = Object.getPrototypeOf(record);
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError(JSON_SAFE_EVENT_DETAILS_ERROR);
+  }
   return Object.fromEntries(
     Object.entries(record)
       .map(([key, value]) => [key, cloneJsonValue(value)])
@@ -180,7 +201,9 @@ export function createSemanticEventLog(options = {}) {
 
   function findEventsByType(type) {
     validateSafeIdentifier(type, "event.type");
-    return getEvents().filter((event) => event.type === type);
+    return enabled
+      ? events.filter((event) => event.type === type).map(cloneSemanticEvent)
+      : [];
   }
 
   function getDiagnostics() {

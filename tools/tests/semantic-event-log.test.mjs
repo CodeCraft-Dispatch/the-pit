@@ -153,6 +153,35 @@ test("rejects unsafe event types and detail keys before they enter the log", () 
   assert.deepEqual(eventLog.getEvents(), []);
 });
 
+test("rejects non-JSON-safe event detail values before they enter the log", () => {
+  const eventLog = createSemanticEventLog({
+    capabilities: enabledCapabilities,
+  });
+
+  assert.throws(
+    () =>
+      eventLog.appendEvent({
+        details: {
+          startedAt: new Date("2026-01-01T00:00:00.000Z"),
+        },
+        type: "ProcessOpened",
+      }),
+    /event\.details values must be JSON-safe primitives, arrays, or plain objects/u,
+  );
+
+  assert.throws(
+    () =>
+      eventLog.appendEvent({
+        details: {
+          progress: Number.POSITIVE_INFINITY,
+        },
+        type: "ProcessAdvanced",
+      }),
+    /event\.details values must be finite numbers/u,
+  );
+  assert.deepEqual(eventLog.getEvents(), []);
+});
+
 test("keeps the semantic event log inert when the module is explicitly disabled", () => {
   const eventLog = createSemanticEventLog({
     capabilities: disabledCapabilities,
