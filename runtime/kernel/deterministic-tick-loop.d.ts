@@ -71,7 +71,10 @@ export interface DeterministicTickLoopOptions {
 }
 
 export interface DeterministicTickLoop {
-  advance(tickCount?: number, commands?: KernelCommandEnvelope[]): KernelEvent[];
+  advance(
+    tickCount?: number,
+    commands?: KernelCommandEnvelope[],
+  ): KernelEvent[];
   enqueueCommand(command: KernelCommandEnvelope): KernelCommandEnvelope;
   getDiagnostics(): Record<string, unknown> | null;
   getEvents(): KernelEvent[];
@@ -89,7 +92,9 @@ export function restoreDeterministicTickLoop(
   options?: DeterministicTickLoopOptions,
 ): DeterministicTickLoop;
 
-export function replayDeterministicTicks(options?: DeterministicTickLoopOptions): {
+export function replayDeterministicTicks(
+  options?: DeterministicTickLoopOptions,
+): {
   events: KernelEvent[];
   snapshot: KernelSnapshot;
 };

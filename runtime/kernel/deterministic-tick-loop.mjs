@@ -32,9 +32,7 @@ function validateSafeIdentifier(value, label) {
     value.length > 128 ||
     !identifierPattern.test(value)
   ) {
-    throw new TypeError(
-      `${label} must be 1-128 safe identifier characters`,
-    );
+    throw new TypeError(`${label} must be 1-128 safe identifier characters`);
   }
 }
 
