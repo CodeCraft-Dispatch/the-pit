@@ -174,6 +174,14 @@ function serializeQueuedCommand(entry) {
   };
 }
 
+function compareQueuedCommands(left, right) {
+  const tickDiff = left.targetTick - right.targetTick;
+  if (tickDiff !== 0) {
+    return tickDiff;
+  }
+  return left.receivedOrder - right.receivedOrder;
+}
+
 function buildQueuedCommands(entries = []) {
   const queuedCommands = entries.map((entry) => {
     assertPlainObject(entry, "queued command");
@@ -187,13 +195,7 @@ function buildQueuedCommands(entries = []) {
     };
   });
 
-  queuedCommands.sort((left, right) => {
-    const tickDiff = left.targetTick - right.targetTick;
-    if (tickDiff !== 0) {
-      return tickDiff;
-    }
-    return left.receivedOrder - right.receivedOrder;
-  });
+  queuedCommands.sort(compareQueuedCommands);
 
   return queuedCommands;
 }
@@ -452,6 +454,8 @@ export function createDeterministicTickLoop(options = {}) {
       processes: sortProcesses(processes.values()).map((process) => ({
         ...process,
       })),
+      // queuedCommands are maintained in (targetTick, receivedOrder) order,
+      // so snapshot serialization keeps this deterministic in-memory order.
       queuedCommands: queuedCommands.map(serializeQueuedCommand),
       schemaVersion: SNAPSHOT_SCHEMA_VERSION,
       seed,
