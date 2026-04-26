@@ -1,8 +1,9 @@
 import {
   assertPlainObject,
   compareStableStrings,
+  createCommandRejectedEvent,
   createProcessStateContainer,
-  validProcessStates,
+  normalizeProcessCommand,
   validateNonNegativeInteger,
   validatePositiveInteger,
   validateSafeIdentifier,
@@ -11,8 +12,6 @@ import {
 const PROCESS_CORE_FLAG = "kernel.wasm.processCore";
 const DIAGNOSTICS_FLAG = "kernel.module.diagnostics";
 const SNAPSHOT_SCHEMA_VERSION = 1;
-
-const validCommandTypes = new Set(["openProcess", "setProcessState"]);
 
 function cloneJsonValue(value) {
   if (Array.isArray(value)) {
@@ -53,30 +52,6 @@ function capabilityDetails(capabilitySnapshot) {
   };
 }
 
-function validateCommand(command) {
-  assertPlainObject(command, "command");
-
-  if (!validCommandTypes.has(command.type)) {
-    throw new TypeError(`unsupported command type ${String(command.type)}`);
-  }
-
-  validateSafeIdentifier(command.id, "command.id");
-  validateSafeIdentifier(command.processId, "command.processId");
-
-  if (command.type === "setProcessState") {
-    if (!validProcessStates.has(command.state)) {
-      throw new TypeError(`unsupported process state ${String(command.state)}`);
-    }
-  }
-
-  return {
-    id: command.id,
-    processId: command.processId,
-    state: command.state,
-    type: command.type,
-  };
-}
-
 function serializeQueuedCommand(entry) {
   return {
     command: { ...entry.command },
@@ -100,7 +75,7 @@ function buildQueuedCommands(entries = []) {
     validateNonNegativeInteger(entry.targetTick, "targetTick");
 
     return {
-      command: validateCommand(entry.command),
+      command: normalizeProcessCommand(entry.command),
       receivedOrder: entry.receivedOrder,
       targetTick: entry.targetTick,
     };
@@ -202,11 +177,8 @@ export function createDeterministicTickLoop(options = {}) {
 
   function rejectCommand(command, reason) {
     diagnostics.rejectedCommandCount += 1;
-    emit("CommandRejected", {
-      commandId: command.id ?? "unknown",
-      commandType: command.type ?? "unknown",
-      reason,
-    });
+    const event = createCommandRejectedEvent(command, reason);
+    emit(event.type, event.details);
   }
 
   function applyCommand(command) {
@@ -258,7 +230,7 @@ export function createDeterministicTickLoop(options = {}) {
   }
 
   function enqueueCommand(command) {
-    const normalized = validateCommand(command);
+    const normalized = normalizeProcessCommand(command);
     queuedCommands.push({
       command: normalized,
       receivedOrder: nextCommandOrder,
