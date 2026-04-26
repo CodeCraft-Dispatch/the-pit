@@ -18,8 +18,16 @@ export const processCommandTypes = Object.freeze([
   "setProcessState",
 ]);
 
-export const validProcessStates = new Set(processStateNames);
-export const validProcessCommandTypes = new Set(processCommandTypes);
+const validProcessStates = new Set(processStateNames);
+const validProcessCommandTypes = new Set(processCommandTypes);
+
+export function isValidProcessState(state) {
+  return validProcessStates.has(state);
+}
+
+export function isValidProcessCommandType(type) {
+  return validProcessCommandTypes.has(type);
+}
 
 const identifierPattern = /^[A-Za-z0-9._:-]+$/u;
 
@@ -69,7 +77,7 @@ export function buildProcessRecord(process) {
   validateSafeIdentifier(process.id, "process.id");
 
   const state = process.state ?? "dormant";
-  if (!validProcessStates.has(state)) {
+  if (!isValidProcessState(state)) {
     throw new TypeError(`process ${process.id} has invalid state ${state}`);
   }
 
@@ -92,7 +100,7 @@ export function buildProcessRecord(process) {
 export function normalizeProcessCommand(command) {
   assertPlainObject(command, "command");
 
-  if (!validProcessCommandTypes.has(command.type)) {
+  if (!isValidProcessCommandType(command.type)) {
     throw new TypeError(`unsupported command type ${String(command.type)}`);
   }
 
@@ -100,7 +108,7 @@ export function normalizeProcessCommand(command) {
   validateSafeIdentifier(command.processId, "command.processId");
 
   if (command.type === "setProcessState") {
-    if (!validProcessStates.has(command.state)) {
+    if (!isValidProcessState(command.state)) {
       throw new TypeError(`unsupported process state ${String(command.state)}`);
     }
   }
@@ -224,7 +232,10 @@ export function createProcessStateContainer(processes = []) {
           type: "ProcessAdvanced",
         });
 
-        if (process.settlesAt !== null && process.progress >= process.settlesAt) {
+        if (
+          process.settlesAt !== null &&
+          process.progress >= process.settlesAt
+        ) {
           process.state = "settling";
           events.push({
             details: {
