@@ -39,7 +39,10 @@ const processDisabledCapabilities = Object.freeze({
 });
 
 test("derives the Wasm command-dispatcher capability mask from boot flags", () => {
-  assert.equal(createWasmCommandDispatcherCapabilityMask(enabledCapabilities), 3);
+  assert.equal(
+    createWasmCommandDispatcherCapabilityMask(enabledCapabilities),
+    3,
+  );
   assert.equal(
     createWasmCommandDispatcherCapabilityMask(dispatcherDisabledCapabilities),
     1,

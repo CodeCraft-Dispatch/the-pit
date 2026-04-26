@@ -53,6 +53,15 @@ export function normalizeCommandEnvelope(command) {
   return normalizeProcessCommand(command);
 }
 
+function createDispatchEnvelope(command) {
+  assertPlainObject(command, "command");
+
+  return {
+    id: command.id,
+    type: command.type,
+  };
+}
+
 export function buildQueuedCommandEntries(entries = []) {
   const queuedCommands = entries.map(normalizeQueuedCommand);
   queuedCommands.sort(compareQueuedCommands);
@@ -83,17 +92,23 @@ export function createCommandDispatcher(options = {}) {
   let nextCommandOrder = options.nextCommandOrder ?? 1;
   validatePositiveInteger(nextCommandOrder, "nextCommandOrder");
 
-  const queuedCommands = buildQueuedCommandEntries(options.queuedCommands ?? []);
+  const queuedCommands = buildQueuedCommandEntries(
+    options.queuedCommands ?? [],
+  );
 
   function hasCapability(flagId) {
+    if (flagId === COMMAND_DISPATCHER_FLAG) {
+      // Keep the reference model compatible with earlier process-core boot
+      // snapshots. Once a shell declares the dispatcher flag explicitly, false is
+      // treated as a hard module disablement.
+      return capabilityValues[COMMAND_DISPATCHER_FLAG] !== false;
+    }
+
     return capabilityValues[flagId] === true;
   }
 
   function isCommandDispatcherAvailable() {
-    // Keep the reference model compatible with earlier process-core boot
-    // snapshots. Once a shell declares the dispatcher flag explicitly, false is
-    // treated as a hard module disablement.
-    return capabilityValues[COMMAND_DISPATCHER_FLAG] !== false;
+    return hasCapability(COMMAND_DISPATCHER_FLAG);
   }
 
   function getCommandFamily(command) {
@@ -105,8 +120,12 @@ export function createCommandDispatcher(options = {}) {
   }
 
   function dispatchCommand(command) {
-    const normalized = normalizeCommandEnvelope(command);
-    const family = getCommandFamily(normalized);
+    const dispatchEnvelope = createDispatchEnvelope(command);
+    const family = getCommandFamily(dispatchEnvelope);
+    const normalized =
+      family === "process"
+        ? normalizeProcessCommand(command)
+        : dispatchEnvelope;
 
     if (family === "process" && !isCommandDispatcherAvailable()) {
       return [
@@ -128,7 +147,9 @@ export function createCommandDispatcher(options = {}) {
 
     const handler = handlers[family];
     if (typeof handler !== "function") {
-      return [createCommandRejectedEvent(normalized, `unsupported-family:${family}`)];
+      return [
+        createCommandRejectedEvent(normalized, `unsupported-family:${family}`),
+      ];
     }
 
     return handler(normalized);
