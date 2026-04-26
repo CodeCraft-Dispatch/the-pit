@@ -31,8 +31,10 @@ Use the smallest type that accurately describes the change.
 | `build`    | The commit changes package dependencies, build scripts, generated build surfaces, or local developer tooling.        |
 | `ci`       | The commit changes GitHub Actions, deployment automation, or pipeline behavior.                                      |
 | `style`    | The commit changes formatting only.                                                                                  |
+| `spec`     | The commit changes executable behavior specifications authored as feature files.                                     |
 | `chore`    | The commit performs repository maintenance that does not fit the other types.                                        |
 | `revert`   | The commit reverts a previous commit.                                                                                |
+| `types`    | The commit changes type declaration surfaces without changing runtime behavior.                                      |
 
 ## Recommended scopes
 
