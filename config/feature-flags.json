@@ -61,6 +61,18 @@
       "tags": ["wasm", "kernel", "module", "dispatcher"]
     },
     {
+      "id": "kernel.module.semanticEventLog",
+      "kind": "kernel",
+      "description": "Enable deterministic semantic event storage, sequence allocation, event querying, and replayable event-log snapshots.",
+      "default": true,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore"],
+      "tags": ["wasm", "kernel", "module", "event-log", "replay"]
+    },
+    {
       "id": "kernel.module.scheduler",
       "kind": "kernel",
       "description": "Enable deterministic scheduler queues, budgets, fairness, and deferred process work.",
