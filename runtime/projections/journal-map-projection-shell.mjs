@@ -478,12 +478,12 @@ export function createJournalMapProjectionShell(options = {}) {
     const semanticMap = getSemanticMap();
     return {
       enabled,
+      journalEntryCount: getJournalEntries().length,
       lastSequence: enabled ? lastSequence : 0,
       mapEdgeCount: semanticMap.edges.length,
       mapNodeCount: semanticMap.nodes.length,
       projectionFlag: JOURNAL_MAP_PROJECTION_FLAG,
       schemaVersion: JOURNAL_MAP_PROJECTION_SCHEMA_VERSION,
-      journalEntryCount: getJournalEntries().length,
     };
   }
 
