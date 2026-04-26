@@ -16,7 +16,7 @@
     "lint:repo": "node ./tools/validate-repo.mjs",
     "hooks:install": "node ./tools/install-git-hooks.mjs",
     "spec:validate": "node ./tools/validate-features.mjs",
-    "test:knowledge": "node --test ./tools/tests",
+    "test:knowledge": "node --test ./tools/tests/*.test.mjs",
     "test": "npm run spec:validate && npm run test:knowledge",
     "test:mutation": "stryker run",
     "build": "node ./tools/build-knowledge-site.mjs",
