@@ -49,6 +49,18 @@
       "tags": ["wasm", "kernel", "module"]
     },
     {
+      "id": "kernel.module.commandDispatcher",
+      "kind": "kernel",
+      "description": "Enable deterministic command normalization, queue ordering, and module dispatch for process command envelopes.",
+      "default": false,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.wasm.processCore"],
+      "tags": ["wasm", "kernel", "module", "dispatcher"]
+    },
+    {
       "id": "kernel.module.scheduler",
       "kind": "kernel",
       "description": "Enable deterministic scheduler queues, budgets, fairness, and deferred process work.",
