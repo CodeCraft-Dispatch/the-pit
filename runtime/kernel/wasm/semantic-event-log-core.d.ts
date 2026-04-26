@@ -1,7 +1,10 @@
-import type { KernelCapabilitySnapshot } from "../semantic-event-log";
+export interface WasmSemanticEventLogCapabilities {
+  values: Record<string, boolean>;
+  provenance?: Record<string, unknown>;
+}
 
 export interface WasmSemanticEventLogCoreOptions {
-  capabilities?: KernelCapabilitySnapshot;
+  capabilities?: WasmSemanticEventLogCapabilities;
   eventCount?: number;
 }
 
@@ -19,7 +22,7 @@ export interface WasmSemanticEventLogCore {
 }
 
 export function createWasmSemanticEventLogCapabilityMask(
-  capabilities?: KernelCapabilitySnapshot,
+  capabilities?: WasmSemanticEventLogCapabilities,
 ): number;
 
 export function createWasmSemanticEventLogCore(
