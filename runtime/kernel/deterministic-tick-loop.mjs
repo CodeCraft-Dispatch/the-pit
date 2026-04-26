@@ -1,9 +1,12 @@
 import {
+  createCommandDispatcher,
+  createProcessCommandHandler,
+  normalizeCommandEnvelope,
+} from "./command-dispatcher.mjs";
+import {
   assertPlainObject,
   compareStableStrings,
-  createCommandRejectedEvent,
   createProcessStateContainer,
-  normalizeProcessCommand,
   validateNonNegativeInteger,
   validatePositiveInteger,
   validateSafeIdentifier,
@@ -52,40 +55,6 @@ function capabilityDetails(capabilitySnapshot) {
   };
 }
 
-function serializeQueuedCommand(entry) {
-  return {
-    command: { ...entry.command },
-    receivedOrder: entry.receivedOrder,
-    targetTick: entry.targetTick,
-  };
-}
-
-function compareQueuedCommands(left, right) {
-  const tickDiff = left.targetTick - right.targetTick;
-  if (tickDiff !== 0) {
-    return tickDiff;
-  }
-  return left.receivedOrder - right.receivedOrder;
-}
-
-function buildQueuedCommands(entries = []) {
-  const queuedCommands = entries.map((entry) => {
-    assertPlainObject(entry, "queued command");
-    validateNonNegativeInteger(entry.receivedOrder, "receivedOrder");
-    validateNonNegativeInteger(entry.targetTick, "targetTick");
-
-    return {
-      command: normalizeProcessCommand(entry.command),
-      receivedOrder: entry.receivedOrder,
-      targetTick: entry.targetTick,
-    };
-  });
-
-  queuedCommands.sort(compareQueuedCommands);
-
-  return queuedCommands;
-}
-
 function cloneEventLog(events = []) {
   return events.map((event) => {
     assertPlainObject(event, "event");
@@ -119,7 +88,7 @@ function createInitialState(options) {
     processContainer: createProcessStateContainer(
       restoredState.processes ?? content.processes,
     ),
-    queuedCommands: buildQueuedCommands(restoredState.queuedCommands ?? []),
+    queuedCommands: restoredState.queuedCommands ?? [],
     tick: restoredState.tick ?? 0,
   };
 }
@@ -139,15 +108,21 @@ export function createDeterministicTickLoop(options = {}) {
   validateNonNegativeInteger(initialState.tick, "tick");
 
   const processContainer = initialState.processContainer;
-  const queuedCommands = initialState.queuedCommands;
+  const commandDispatcher = createCommandDispatcher({
+    capabilities: capabilitySnapshot,
+    handlers: {
+      process: createProcessCommandHandler(processContainer),
+    },
+    nextCommandOrder: initialState.nextCommandOrder,
+    queuedCommands: initialState.queuedCommands,
+  });
   const eventLog = initialState.eventLog;
   let tick = initialState.tick;
   let nextSequence = initialState.nextSequence;
-  let nextCommandOrder = initialState.nextCommandOrder;
   const diagnostics = {
     eventCount: eventLog.length,
     processCount: processContainer.getProcessCount(),
-    queueDepth: queuedCommands.length,
+    queueDepth: commandDispatcher.getQueueDepth(),
     rejectedCommandCount: 0,
     tickCount: tick,
   };
@@ -180,42 +155,10 @@ export function createDeterministicTickLoop(options = {}) {
     return rejectedCount;
   }
 
-  function rejectCommand(command, reason) {
-    diagnostics.rejectedCommandCount += 1;
-    const event = createCommandRejectedEvent(command, reason);
-    emit(event.type, event.details);
-  }
-
-  function applyCommand(command) {
-    if (!hasCapability(PROCESS_CORE_FLAG)) {
-      rejectCommand(command, "capability-disabled:kernel.wasm.processCore");
-      return;
-    }
-
-    const events = processContainer.applyCommand(command);
-    diagnostics.rejectedCommandCount += emitProcessEvents(events);
-  }
-
   function processQueuedCommandsForCurrentTick() {
-    // queuedCommands are kept sorted by compareQueuedCommands, so once we
-    // encounter a targetTick beyond the current tick, the remainder are pending.
-    let readyCount = 0;
-    while (
-      readyCount < queuedCommands.length &&
-      queuedCommands[readyCount].targetTick <= tick
-    ) {
-      readyCount += 1;
-    }
-
-    for (let index = 0; index < readyCount; index += 1) {
-      applyCommand(queuedCommands[index].command);
-    }
-
-    if (readyCount > 0) {
-      queuedCommands.splice(0, readyCount);
-    }
-
-    diagnostics.queueDepth = queuedCommands.length;
+    const dispatchedEvents = commandDispatcher.dispatchReadyCommands(tick);
+    diagnostics.rejectedCommandCount += emitProcessEvents(dispatchedEvents);
+    diagnostics.queueDepth = commandDispatcher.getQueueDepth();
   }
 
   function step() {
@@ -229,18 +172,14 @@ export function createDeterministicTickLoop(options = {}) {
     }
 
     diagnostics.processCount = processContainer.getProcessCount();
-    diagnostics.queueDepth = queuedCommands.length;
+    diagnostics.queueDepth = commandDispatcher.getQueueDepth();
   }
 
   function enqueueCommand(command) {
-    const normalized = normalizeProcessCommand(command);
-    queuedCommands.push({
-      command: normalized,
-      receivedOrder: nextCommandOrder,
-      targetTick: tick + 1,
+    const normalized = commandDispatcher.enqueueCommand(command, {
+      currentTick: tick,
     });
-    nextCommandOrder += 1;
-    diagnostics.queueDepth = queuedCommands.length;
+    diagnostics.queueDepth = commandDispatcher.getQueueDepth();
     return normalized;
   }
 
@@ -283,12 +222,10 @@ export function createDeterministicTickLoop(options = {}) {
       capabilitySnapshot: capabilityDetails(capabilitySnapshot),
       eventLog: getEvents(),
       manifestVersion,
-      nextCommandOrder,
+      nextCommandOrder: commandDispatcher.getNextCommandOrder(),
       nextSequence,
       processes: processContainer.snapshot(),
-      // queuedCommands are maintained in (targetTick, receivedOrder) order,
-      // so snapshot serialization keeps this deterministic in-memory order.
-      queuedCommands: queuedCommands.map(serializeQueuedCommand),
+      queuedCommands: commandDispatcher.snapshot(),
       schemaVersion: SNAPSHOT_SCHEMA_VERSION,
       seed,
       tick,
@@ -354,7 +291,7 @@ export function replayDeterministicTicks(options = {}) {
     assertPlainObject(entry, "commandStream entry");
     validatePositiveInteger(entry.tick, "commandStream tick");
     const commands = commandsByTick.get(entry.tick) ?? [];
-    commands.push(entry.command);
+    commands.push(normalizeCommandEnvelope(entry.command));
     commandsByTick.set(entry.tick, commands);
   }
 
