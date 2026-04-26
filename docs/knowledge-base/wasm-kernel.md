@@ -15,6 +15,7 @@ The kernel should provide:
 - deterministic fixed-step execution
 - budgeted process advancement
 - stable event emission
+- semantic event-log storage and queries
 - snapshot and replay hooks
 - topology and constraint primitives
 - low-level capability gates
@@ -121,6 +122,21 @@ Model process states such as:
 
 The process core should not decide narrative meaning. It should emit events that the domain runtime interprets.
 
+### Semantic event log
+
+Store deterministic semantic events in a versioned log.
+
+Minimum behaviors:
+
+- validate event types and top-level detail keys before storage
+- assign monotonic event sequence identifiers
+- stamp events with deterministic ticks
+- expose cloned event queries
+- snapshot and restore event-log state
+- degrade to an inert stale trace when explicitly disabled
+
+The semantic event log should not decide narrative meaning, project player-facing journals, or own browser persistence. It should preserve replayable facts that other layers can interpret.
+
 ### Topology core
 
 Support graph and region operations that make Echoing Paths, Mirror spaces, transit logic, and map-mediated play possible.
@@ -182,12 +198,14 @@ The kernel should be built from modules that expose small capabilities.
 Recommended first modules:
 
 1. `process-core` — process state transitions and process queues
-2. `scheduler` — tick ordering, budgets, fairness, deferred work
-3. `topology` — graph, route, region, and rewrite primitives
-4. `constraints` — occupancy, threshold, relation, and trigger constraints
-5. `snapshot-replay` — snapshot, restore, and trace emission
-6. `diagnostics` — performance counters and debug event surfaces
-7. `spatial-port` — optional spatial query adapter, not a full physics engine
+2. `command-dispatcher` — command normalization, queue ordering, capability-gated routing
+3. `semantic-event-log` — deterministic event storage, sequence allocation, queries, and snapshots
+4. `scheduler` — tick ordering, budgets, fairness, deferred work
+5. `topology` — graph, route, region, and rewrite primitives
+6. `constraints` — occupancy, threshold, relation, and trigger constraints
+7. `snapshot-replay` — snapshot, restore, and trace emission
+8. `diagnostics` — performance counters and debug event surfaces
+9. `spatial-port` — optional spatial query adapter, not a full physics engine
 
 Each module should declare:
 
@@ -221,6 +239,7 @@ The kernel may consume resolved flags, but it must not resolve them. The platfor
 Good kernel flag examples:
 
 - `kernel.wasm.processCore`
+- `kernel.module.semanticEventLog`
 - `kernel.module.topology`
 - `kernel.module.snapshotReplay`
 - `kernel.module.diagnostics`
@@ -296,9 +315,10 @@ The first viable Wasm kernel should do only this:
 3. accept a small command envelope
 4. advance a small set of process states
 5. emit semantic events
-6. produce and restore a snapshot
-7. support a replay of the same command stream
-8. expose basic diagnostics under a hidden flag
+6. store and query semantic events deterministically
+7. produce and restore a snapshot
+8. support a replay of the same command stream
+9. expose basic diagnostics under a hidden flag
 
 Do not add topology rewrites, spatial queries, or complex scheduler policy until the process core proves the contract.
 
