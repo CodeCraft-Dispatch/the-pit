@@ -8,7 +8,8 @@ import {
   validatePositiveInteger,
 } from "./process-state-container.mjs";
 
-const PROCESS_CORE_FLAG = "kernel.wasm.processCore";
+export const COMMAND_DISPATCHER_FLAG = "kernel.module.commandDispatcher";
+export const PROCESS_CORE_FLAG = "kernel.wasm.processCore";
 
 function cloneCommand(command) {
   return { ...command };
@@ -88,6 +89,13 @@ export function createCommandDispatcher(options = {}) {
     return capabilityValues[flagId] === true;
   }
 
+  function isCommandDispatcherAvailable() {
+    // Keep the reference model compatible with earlier process-core boot
+    // snapshots. Once a shell declares the dispatcher flag explicitly, false is
+    // treated as a hard module disablement.
+    return capabilityValues[COMMAND_DISPATCHER_FLAG] !== false;
+  }
+
   function getCommandFamily(command) {
     if (isValidProcessCommandType(command.type)) {
       return "process";
@@ -99,6 +107,15 @@ export function createCommandDispatcher(options = {}) {
   function dispatchCommand(command) {
     const normalized = normalizeCommandEnvelope(command);
     const family = getCommandFamily(normalized);
+
+    if (family === "process" && !isCommandDispatcherAvailable()) {
+      return [
+        createCommandRejectedEvent(
+          normalized,
+          "capability-disabled:kernel.module.commandDispatcher",
+        ),
+      ];
+    }
 
     if (family === "process" && !hasCapability(PROCESS_CORE_FLAG)) {
       return [
