@@ -170,9 +170,14 @@ export function createDeterministicTickLoop(options = {}) {
   }
 
   function emitProcessEvents(events) {
+    let rejectedCount = 0;
     for (const event of events) {
+      if (event.type === "CommandRejected") {
+        rejectedCount += 1;
+      }
       emit(event.type, event.details);
     }
+    return rejectedCount;
   }
 
   function rejectCommand(command, reason) {
@@ -188,9 +193,7 @@ export function createDeterministicTickLoop(options = {}) {
     }
 
     const events = processContainer.applyCommand(command);
-    const rejectedEvents = events.filter((event) => event.type === "CommandRejected");
-    diagnostics.rejectedCommandCount += rejectedEvents.length;
-    emitProcessEvents(events);
+    diagnostics.rejectedCommandCount += emitProcessEvents(events);
   }
 
   function processQueuedCommandsForCurrentTick() {

@@ -43,8 +43,13 @@ export interface ProcessStateContainer {
 
 export const processStateNames: readonly KernelProcessState[];
 export const processCommandTypes: readonly ProcessStateCommandType[];
-export const validProcessStates: Set<KernelProcessState>;
-export const validProcessCommandTypes: Set<ProcessStateCommandType>;
+
+export function isValidProcessState(
+  state: unknown,
+): state is KernelProcessState;
+export function isValidProcessCommandType(
+  type: unknown,
+): type is ProcessStateCommandType;
 
 export function compareStableStrings(left: string, right: string): number;
 export function assertPlainObject(value: unknown, label: string): void;
