@@ -17,6 +17,19 @@ const enabledCapabilities = Object.freeze({
   },
 });
 
+const dispatcherDisabledCapabilities = Object.freeze({
+  values: {
+    "kernel.module.commandDispatcher": false,
+    "kernel.module.diagnostics": true,
+    "kernel.wasm.processCore": true,
+  },
+  provenance: {
+    "kernel.module.commandDispatcher": { source: "build" },
+    "kernel.module.diagnostics": { source: "build" },
+    "kernel.wasm.processCore": { source: "build" },
+  },
+});
+
 const disabledCapabilities = Object.freeze({
   values: {
     "kernel.module.diagnostics": true,
@@ -143,6 +156,44 @@ test("degrades lawfully when process core capability is disabled", () => {
       sequence: 1,
       tick: 1,
       type: "CommandRejected",
+    },
+  ]);
+  assert.deepEqual(loop.getProcess("archive.glass-red"), {
+    id: "archive.glass-red",
+    progress: 0,
+    settlesAt: 2,
+    state: "dormant",
+  });
+});
+
+test("degrades lawfully when command dispatcher capability is explicitly disabled", () => {
+  const loop = createDeterministicTickLoop({
+    capabilities: dispatcherDisabledCapabilities,
+    content: content(),
+  });
+
+  const events = loop.advance(1, [commandStream()[0].command]);
+
+  assert.deepEqual(events, [
+    {
+      details: {
+        commandId: "cmd.open-glass-red",
+        commandType: "openProcess",
+        reason: "capability-disabled:kernel.module.commandDispatcher",
+      },
+      sequence: 1,
+      tick: 1,
+      type: "CommandRejected",
+    },
+    {
+      details: {
+        processId: "route.north-gallery",
+        progress: 0,
+        state: "recurring",
+      },
+      sequence: 2,
+      tick: 1,
+      type: "ProcessRecurringObserved",
     },
   ]);
   assert.deepEqual(loop.getProcess("archive.glass-red"), {
