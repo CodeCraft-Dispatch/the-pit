@@ -33,7 +33,11 @@ function assertPlainObject(value, label) {
 }
 
 function validateProcessCount(value) {
-  if (!Number.isSafeInteger(value) || value < 0 || value > MAX_I32_PROCESS_COUNT) {
+  if (
+    !Number.isSafeInteger(value) ||
+    value < 0 ||
+    value > MAX_I32_PROCESS_COUNT
+  ) {
     throw new RangeError(
       `processCount must be an integer from 0 to ${MAX_I32_PROCESS_COUNT}`,
     );

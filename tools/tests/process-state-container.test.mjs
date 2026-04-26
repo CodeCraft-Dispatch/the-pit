@@ -208,7 +208,11 @@ test("advances opened processes and emits settling when thresholds are reached",
 
 test("rejects duplicate and unsafe process definitions before container creation", () => {
   assert.throws(
-    () => createProcessStateContainer([{ id: "archive.one" }, { id: "archive.one" }]),
+    () =>
+      createProcessStateContainer([
+        { id: "archive.one" },
+        { id: "archive.one" },
+      ]),
     /duplicate process id archive.one/u,
   );
 
