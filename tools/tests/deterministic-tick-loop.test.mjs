@@ -193,3 +193,78 @@ test("rejects unsafe command identifiers before they enter the queue", () => {
   );
   assert.deepEqual(loop.getEvents(), []);
 });
+
+test("sorts process snapshots using locale-independent id ordering", () => {
+  const loop = createDeterministicTickLoop({
+    capabilities: enabledCapabilities,
+    content: {
+      processes: [{ id: "alpha.route" }, { id: "Zeta.route" }],
+    },
+  });
+
+  assert.deepEqual(
+    loop.snapshot().processes.map((process) => process.id),
+    ["Zeta.route", "alpha.route"],
+  );
+});
+
+test("replays restored queued commands in target tick then received order", () => {
+  const loop = createDeterministicTickLoop({
+    capabilities: enabledCapabilities,
+    content: {
+      processes: [{ id: "archive.glass-red", state: "opened" }],
+    },
+    state: {
+      eventLog: [],
+      nextCommandOrder: 3,
+      nextSequence: 1,
+      processes: [{ id: "archive.glass-red", state: "opened" }],
+      queuedCommands: [
+        {
+          command: {
+            id: "cmd.set-recurring",
+            processId: "archive.glass-red",
+            state: "recurring",
+            type: "setProcessState",
+          },
+          receivedOrder: 2,
+          targetTick: 2,
+        },
+        {
+          command: {
+            id: "cmd.set-waiting",
+            processId: "archive.glass-red",
+            state: "waiting",
+            type: "setProcessState",
+          },
+          receivedOrder: 1,
+          targetTick: 1,
+        },
+      ],
+      tick: 0,
+    },
+  });
+
+  const events = loop.advance(2);
+
+  assert.deepEqual(
+    events
+      .filter((event) => event.type === "ProcessStateSet")
+      .map((event) => [
+        event.tick,
+        event.details.commandId,
+        event.details.state,
+      ]),
+    [
+      [1, "cmd.set-waiting", "waiting"],
+      [2, "cmd.set-recurring", "recurring"],
+    ],
+  );
+  assert.deepEqual(
+    events
+      .filter((event) => event.type === "ProcessRecurringObserved")
+      .map((event) => event.tick),
+    [2],
+  );
+  assert.equal(loop.getDiagnostics()?.queueDepth, 0);
+});

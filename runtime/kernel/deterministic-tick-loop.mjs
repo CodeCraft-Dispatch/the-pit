@@ -19,6 +19,16 @@ const validProcessStates = new Set([
 const validCommandTypes = new Set(["openProcess", "setProcessState"]);
 const identifierPattern = /^[A-Za-z0-9._:-]+$/u;
 
+function compareStableStrings(left, right) {
+  if (left < right) {
+    return -1;
+  }
+  if (left > right) {
+    return 1;
+  }
+  return 0;
+}
+
 function assertPlainObject(value, label) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     throw new TypeError(`${label} must be an object`);
@@ -65,7 +75,7 @@ function cloneSortedRecord(record = {}) {
   return Object.fromEntries(
     Object.entries(record)
       .map(([key, value]) => [key, cloneJsonValue(value)])
-      .sort(([left], [right]) => left.localeCompare(right)),
+      .sort(([left], [right]) => compareStableStrings(left, right)),
   );
 }
 
@@ -127,7 +137,9 @@ function buildProcessMap(processes = []) {
 }
 
 function sortProcesses(processes) {
-  return [...processes].sort((left, right) => left.id.localeCompare(right.id));
+  return [...processes].sort((left, right) =>
+    compareStableStrings(left.id, right.id),
+  );
 }
 
 function validateCommand(command) {
@@ -163,7 +175,7 @@ function serializeQueuedCommand(entry) {
 }
 
 function buildQueuedCommands(entries = []) {
-  return entries.map((entry) => {
+  const queuedCommands = entries.map((entry) => {
     assertPlainObject(entry, "queued command");
     validateNonNegativeInteger(entry.receivedOrder, "receivedOrder");
     validateNonNegativeInteger(entry.targetTick, "targetTick");
@@ -174,6 +186,16 @@ function buildQueuedCommands(entries = []) {
       targetTick: entry.targetTick,
     };
   });
+
+  queuedCommands.sort((left, right) => {
+    const tickDiff = left.targetTick - right.targetTick;
+    if (tickDiff !== 0) {
+      return tickDiff;
+    }
+    return left.receivedOrder - right.receivedOrder;
+  });
+
+  return queuedCommands;
 }
 
 function cloneEventLog(events = []) {
@@ -339,14 +361,20 @@ export function createDeterministicTickLoop(options = {}) {
   }
 
   function processQueuedCommandsForCurrentTick() {
-    const ready = queuedCommands
-      .filter((entry) => entry.targetTick <= tick)
-      .sort((left, right) => left.receivedOrder - right.receivedOrder);
+    let readyCount = 0;
+    while (
+      readyCount < queuedCommands.length &&
+      queuedCommands[readyCount].targetTick <= tick
+    ) {
+      readyCount += 1;
+    }
 
-    for (const entry of ready) {
-      const index = queuedCommands.indexOf(entry);
-      queuedCommands.splice(index, 1);
-      applyCommand(entry.command);
+    for (let index = 0; index < readyCount; index += 1) {
+      applyCommand(queuedCommands[index].command);
+    }
+
+    if (readyCount > 0) {
+      queuedCommands.splice(0, readyCount);
     }
 
     diagnostics.queueDepth = queuedCommands.length;
@@ -424,9 +452,7 @@ export function createDeterministicTickLoop(options = {}) {
       processes: sortProcesses(processes.values()).map((process) => ({
         ...process,
       })),
-      queuedCommands: queuedCommands
-        .map(serializeQueuedCommand)
-        .sort((left, right) => left.receivedOrder - right.receivedOrder),
+      queuedCommands: queuedCommands.map(serializeQueuedCommand),
       schemaVersion: SNAPSHOT_SCHEMA_VERSION,
       seed,
       tick,

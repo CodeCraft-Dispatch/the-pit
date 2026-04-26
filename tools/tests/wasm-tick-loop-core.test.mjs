@@ -75,6 +75,23 @@ test("rejects invalid tick deltas before they cross the wasm boundary", async ()
   assert.equal(core.getTick(), 0);
 });
 
+test("rejects tick deltas that would overflow the i32 tick counter", async () => {
+  const core = await createWasmTickLoopCore({
+    capabilities: enabledCapabilities,
+  });
+
+  assert.deepEqual(core.advance(2_147_483_646), {
+    accepted: true,
+    tick: 2_147_483_646,
+  });
+
+  assert.throws(
+    () => core.advance(2),
+    /tickCount would overflow i32 tick counter/u,
+  );
+  assert.equal(core.getTick(), 2_147_483_646);
+});
+
 test("matches the reference tick count for an enabled fixed-step run", async () => {
   const wasmCore = await createWasmTickLoopCore({
     capabilities: enabledCapabilities,
