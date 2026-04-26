@@ -1,64 +1,18 @@
+import {
+  assertPlainObject,
+  compareStableStrings,
+  createProcessStateContainer,
+  validProcessStates,
+  validateNonNegativeInteger,
+  validatePositiveInteger,
+  validateSafeIdentifier,
+} from "./process-state-container.mjs";
+
 const PROCESS_CORE_FLAG = "kernel.wasm.processCore";
 const DIAGNOSTICS_FLAG = "kernel.module.diagnostics";
 const SNAPSHOT_SCHEMA_VERSION = 1;
 
-const validProcessStates = new Set([
-  "dormant",
-  "opened",
-  "advancing",
-  "waiting",
-  "blooming",
-  "settling",
-  "recurring",
-  "drifting",
-  "proliferating",
-  "exhausted",
-  "mutated",
-  "occluded",
-]);
 const validCommandTypes = new Set(["openProcess", "setProcessState"]);
-const identifierPattern = /^[A-Za-z0-9._:-]+$/u;
-
-function compareStableStrings(left, right) {
-  // localeCompare can vary across locale/ICU environments, so use direct
-  // code-unit comparison to keep replay and snapshot ordering deterministic.
-  if (left < right) {
-    return -1;
-  }
-  if (left > right) {
-    return 1;
-  }
-  return 0;
-}
-
-function assertPlainObject(value, label) {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    throw new TypeError(`${label} must be an object`);
-  }
-}
-
-function validateSafeIdentifier(value, label) {
-  if (
-    typeof value !== "string" ||
-    value.length === 0 ||
-    value.length > 128 ||
-    !identifierPattern.test(value)
-  ) {
-    throw new TypeError(`${label} must be 1-128 safe identifier characters`);
-  }
-}
-
-function validateNonNegativeInteger(value, label) {
-  if (!Number.isSafeInteger(value) || value < 0) {
-    throw new RangeError(`${label} must be a non-negative safe integer`);
-  }
-}
-
-function validatePositiveInteger(value, label) {
-  if (!Number.isSafeInteger(value) || value <= 0) {
-    throw new RangeError(`${label} must be a positive safe integer`);
-  }
-}
 
 function cloneJsonValue(value) {
   if (Array.isArray(value)) {
@@ -97,51 +51,6 @@ function capabilityDetails(capabilitySnapshot) {
     values: cloneSortedRecord(capabilitySnapshot.values),
     provenance: cloneSortedRecord(capabilitySnapshot.provenance),
   };
-}
-
-function buildProcessRecord(process) {
-  assertPlainObject(process, "process");
-  validateSafeIdentifier(process.id, "process.id");
-
-  const state = process.state ?? "dormant";
-  if (!validProcessStates.has(state)) {
-    throw new TypeError(`process ${process.id} has invalid state ${state}`);
-  }
-
-  const progress = process.progress ?? 0;
-  validateNonNegativeInteger(progress, `process ${process.id} progress`);
-
-  const settlesAt = process.settlesAt ?? null;
-  if (settlesAt !== null) {
-    validateNonNegativeInteger(settlesAt, `process ${process.id} settlesAt`);
-  }
-
-  return {
-    id: process.id,
-    progress,
-    settlesAt,
-    state,
-  };
-}
-
-function buildProcessMap(processes = []) {
-  const processMap = new Map();
-
-  for (const process of processes) {
-    const record = buildProcessRecord(process);
-    if (processMap.has(record.id)) {
-      throw new TypeError(`duplicate process id ${record.id}`);
-    }
-    processMap.set(record.id, record);
-  }
-
-  return processMap;
-}
-
-function sortProcesses(processes) {
-  return [...processes].sort((left, right) =>
-    compareStableStrings(left.id, right.id),
-  );
 }
 
 function validateCommand(command) {
@@ -232,7 +141,9 @@ function createInitialState(options) {
     eventLog: cloneEventLog(restoredState.eventLog ?? []),
     nextCommandOrder: restoredState.nextCommandOrder ?? 1,
     nextSequence: restoredState.nextSequence ?? 1,
-    processes: buildProcessMap(restoredState.processes ?? content.processes),
+    processContainer: createProcessStateContainer(
+      restoredState.processes ?? content.processes,
+    ),
     queuedCommands: buildQueuedCommands(restoredState.queuedCommands ?? []),
     tick: restoredState.tick ?? 0,
   };
@@ -252,7 +163,7 @@ export function createDeterministicTickLoop(options = {}) {
   validatePositiveInteger(initialState.nextSequence, "nextSequence");
   validateNonNegativeInteger(initialState.tick, "tick");
 
-  const processes = initialState.processes;
+  const processContainer = initialState.processContainer;
   const queuedCommands = initialState.queuedCommands;
   const eventLog = initialState.eventLog;
   let tick = initialState.tick;
@@ -260,7 +171,7 @@ export function createDeterministicTickLoop(options = {}) {
   let nextCommandOrder = initialState.nextCommandOrder;
   const diagnostics = {
     eventCount: eventLog.length,
-    processCount: processes.size,
+    processCount: processContainer.getProcessCount(),
     queueDepth: queuedCommands.length,
     rejectedCommandCount: 0,
     tickCount: tick,
@@ -283,6 +194,12 @@ export function createDeterministicTickLoop(options = {}) {
     return event;
   }
 
+  function emitProcessEvents(events) {
+    for (const event of events) {
+      emit(event.type, event.details);
+    }
+  }
+
   function rejectCommand(command, reason) {
     diagnostics.rejectedCommandCount += 1;
     emit("CommandRejected", {
@@ -298,70 +215,10 @@ export function createDeterministicTickLoop(options = {}) {
       return;
     }
 
-    const process = processes.get(command.processId);
-    if (!process) {
-      rejectCommand(command, "unknown-process");
-      return;
-    }
-
-    if (command.type === "openProcess") {
-      if (process.state === "dormant" || process.state === "occluded") {
-        process.state = "opened";
-        emit("ProcessOpened", {
-          commandId: command.id,
-          processId: process.id,
-          state: process.state,
-        });
-      } else {
-        emit("ProcessOpenIgnored", {
-          commandId: command.id,
-          processId: process.id,
-          state: process.state,
-        });
-      }
-      return;
-    }
-
-    process.state = command.state;
-    emit("ProcessStateSet", {
-      commandId: command.id,
-      processId: process.id,
-      state: process.state,
-    });
-  }
-
-  function advanceProcess(process) {
-    if (!hasCapability(PROCESS_CORE_FLAG)) {
-      return;
-    }
-
-    if (process.state === "opened" || process.state === "advancing") {
-      process.state = "advancing";
-      process.progress += 1;
-      emit("ProcessAdvanced", {
-        processId: process.id,
-        progress: process.progress,
-        state: process.state,
-      });
-
-      if (process.settlesAt !== null && process.progress >= process.settlesAt) {
-        process.state = "settling";
-        emit("ProcessSettling", {
-          processId: process.id,
-          progress: process.progress,
-          state: process.state,
-        });
-      }
-      return;
-    }
-
-    if (process.state === "recurring") {
-      emit("ProcessRecurringObserved", {
-        processId: process.id,
-        progress: process.progress,
-        state: process.state,
-      });
-    }
+    const events = processContainer.applyCommand(command);
+    const rejectedEvents = events.filter((event) => event.type === "CommandRejected");
+    diagnostics.rejectedCommandCount += rejectedEvents.length;
+    emitProcessEvents(events);
   }
 
   function processQueuedCommandsForCurrentTick() {
@@ -392,11 +249,11 @@ export function createDeterministicTickLoop(options = {}) {
 
     processQueuedCommandsForCurrentTick();
 
-    for (const process of sortProcesses(processes.values())) {
-      advanceProcess(process);
+    if (hasCapability(PROCESS_CORE_FLAG)) {
+      emitProcessEvents(processContainer.advanceProcesses());
     }
 
-    diagnostics.processCount = processes.size;
+    diagnostics.processCount = processContainer.getProcessCount();
     diagnostics.queueDepth = queuedCommands.length;
   }
 
@@ -432,9 +289,7 @@ export function createDeterministicTickLoop(options = {}) {
   }
 
   function getProcess(processId) {
-    validateSafeIdentifier(processId, "processId");
-    const process = processes.get(processId);
-    return process ? { ...process } : null;
+    return processContainer.getProcess(processId);
   }
 
   function getDiagnostics() {
@@ -455,9 +310,7 @@ export function createDeterministicTickLoop(options = {}) {
       manifestVersion,
       nextCommandOrder,
       nextSequence,
-      processes: sortProcesses(processes.values()).map((process) => ({
-        ...process,
-      })),
+      processes: processContainer.snapshot(),
       // queuedCommands are maintained in (targetTick, receivedOrder) order,
       // so snapshot serialization keeps this deterministic in-memory order.
       queuedCommands: queuedCommands.map(serializeQueuedCommand),
