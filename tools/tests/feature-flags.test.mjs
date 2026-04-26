@@ -52,6 +52,17 @@ function createManifest() {
         testable: true,
         requires: ["engine.runtime.featureFlags"],
       },
+      {
+        id: "kernel.module.semanticEventLog",
+        kind: "kernel",
+        description: "Enable deterministic semantic event storage.",
+        default: true,
+        exposure: "hidden",
+        persistence: "build",
+        mutableAtRuntime: false,
+        testable: true,
+        requires: ["kernel.wasm.processCore"],
+      },
     ],
   };
 }
@@ -147,10 +158,24 @@ test("dependencies disable flags whose requirements are not enabled", () => {
 
   assert.equal(resolved.values["engine.runtime.featureFlags"], false);
   assert.equal(resolved.values["kernel.wasm.processCore"], false);
+  assert.equal(resolved.values["kernel.module.semanticEventLog"], false);
   assert.equal(resolved.values["ui.playerSettings.flagsPanel"], false);
   assert.equal(resolved.values["content.arc.mirrorDistrict"], false);
   assert.equal(
     resolved.provenance["kernel.wasm.processCore"].source,
     "dependency",
   );
+});
+
+test("semantic event log defaults to true once process core is enabled", () => {
+  const resolved = resolveFeatureFlags(createManifest(), {
+    build: {
+      "kernel.wasm.processCore": true,
+    },
+  });
+
+  assert.equal(resolved.values["kernel.module.semanticEventLog"], true);
+  assert.deepEqual(resolved.provenance["kernel.module.semanticEventLog"], {
+    source: "default",
+  });
 });
