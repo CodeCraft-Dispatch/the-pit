@@ -91,7 +91,9 @@ function cloneEventLog(events = []) {
 
   for (const event of clonedEvents) {
     if (seenSequences.has(event.sequence)) {
-      throw new TypeError(`duplicate semantic event sequence ${event.sequence}`);
+      throw new TypeError(
+        `duplicate semantic event sequence ${event.sequence}`,
+      );
     }
     seenSequences.add(event.sequence);
   }
@@ -124,7 +126,8 @@ export function createSemanticEventLog(options = {}) {
   const state = options.state ?? {};
   assertPlainObject(state, "state");
 
-  const schemaVersion = state.schemaVersion ?? SEMANTIC_EVENT_LOG_SCHEMA_VERSION;
+  const schemaVersion =
+    state.schemaVersion ?? SEMANTIC_EVENT_LOG_SCHEMA_VERSION;
   if (schemaVersion !== SEMANTIC_EVENT_LOG_SCHEMA_VERSION) {
     throw new Error(
       `SEMANTIC_EVENT_LOG_SCHEMA_MISMATCH: expected ${SEMANTIC_EVENT_LOG_SCHEMA_VERSION} but received ${schemaVersion}`,

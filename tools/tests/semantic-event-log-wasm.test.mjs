@@ -48,12 +48,20 @@ const processCoreDisabledCapabilities = Object.freeze({
 });
 
 test("derives the Wasm semantic event log capability mask from boot flags", () => {
-  assert.equal(createWasmSemanticEventLogCapabilityMask(enabledCapabilities), 3);
   assert.equal(
-    createWasmSemanticEventLogCapabilityMask(missingSemanticEventLogCapabilities),
+    createWasmSemanticEventLogCapabilityMask(enabledCapabilities),
     3,
   );
-  assert.equal(createWasmSemanticEventLogCapabilityMask(disabledCapabilities), 1);
+  assert.equal(
+    createWasmSemanticEventLogCapabilityMask(
+      missingSemanticEventLogCapabilities,
+    ),
+    3,
+  );
+  assert.equal(
+    createWasmSemanticEventLogCapabilityMask(disabledCapabilities),
+    1,
+  );
   assert.equal(
     createWasmSemanticEventLogCapabilityMask(processCoreDisabledCapabilities),
     2,

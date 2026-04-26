@@ -61,7 +61,9 @@ test("appends semantic events with deterministic sequence, tick, and detail orde
   });
   assert.equal(second.sequence, 2);
   assert.deepEqual(
-    eventLog.getEvents().map((event) => [event.sequence, event.tick, event.type]),
+    eventLog
+      .getEvents()
+      .map((event) => [event.sequence, event.tick, event.type]),
     [
       [1, 4, "ProcessOpened"],
       [2, 4, "ProcessRecurringObserved"],
