@@ -38,6 +38,13 @@ export interface KernelEvent {
   details: Record<string, unknown>;
 }
 
+export interface KernelSemanticEventLogSnapshot {
+  enabled: boolean;
+  events: KernelEvent[];
+  nextSequence: number;
+  schemaVersion: number;
+}
+
 export interface KernelSnapshot {
   capabilitySnapshot: KernelCapabilitySnapshot;
   eventLog: KernelEvent[];
@@ -52,6 +59,7 @@ export interface KernelSnapshot {
   }>;
   schemaVersion: number;
   seed: string;
+  semanticEventLog?: KernelSemanticEventLogSnapshot;
   tick: number;
 }
 
@@ -76,6 +84,7 @@ export interface DeterministicTickLoop {
     commands?: KernelCommandEnvelope[],
   ): KernelEvent[];
   enqueueCommand(command: KernelCommandEnvelope): KernelCommandEnvelope;
+  findEventsByType(type: string): KernelEvent[];
   getDiagnostics(): Record<string, unknown> | null;
   getEvents(): KernelEvent[];
   getProcess(processId: string): KernelProcessDefinition | null;
