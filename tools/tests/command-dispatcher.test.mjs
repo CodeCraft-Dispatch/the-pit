@@ -56,6 +56,42 @@ function openCommand(id = "cmd.open-glass-red") {
   };
 }
 
+function normalizedOpenCommand(id = "cmd.open-glass-red") {
+  return {
+    ...openCommand(id),
+    state: undefined,
+  };
+}
+
+test("treats missing dispatcher capability values as available for compatibility", () => {
+  const processContainer = createContainer();
+  const dispatcher = createCommandDispatcher({
+    capabilities: {
+      values: {
+        "kernel.wasm.processCore": true,
+      },
+    },
+    handlers: {
+      process: createProcessCommandHandler(processContainer),
+    },
+  });
+
+  assert.equal(
+    dispatcher.hasCapability("kernel.module.commandDispatcher"),
+    true,
+  );
+  assert.deepEqual(dispatcher.dispatchCommand(openCommand()), [
+    {
+      details: {
+        commandId: "cmd.open-glass-red",
+        processId: "archive.glass-red",
+        state: "opened",
+      },
+      type: "ProcessOpened",
+    },
+  ]);
+});
+
 test("dispatches process commands through the process command handler", () => {
   const processContainer = createContainer();
   const dispatcher = createCommandDispatcher({
@@ -154,12 +190,12 @@ test("enqueues commands with deterministic target tick and order", () => {
       currentTick: 4,
       delayTicks: 3,
     }),
-    openCommand("cmd.open-later"),
+    normalizedOpenCommand("cmd.open-later"),
   );
   assert.equal(dispatcher.getNextCommandOrder(), 8);
   assert.deepEqual(dispatcher.snapshot(), [
     {
-      command: openCommand("cmd.open-later"),
+      command: normalizedOpenCommand("cmd.open-later"),
       receivedOrder: 7,
       targetTick: 7,
     },
@@ -218,6 +254,32 @@ test("rejects process commands when process core is disabled", () => {
     settlesAt: null,
     state: "dormant",
   });
+});
+
+test("rejects unsupported command families without throwing", () => {
+  const dispatcher = createCommandDispatcher({
+    capabilities: enabledCapabilities,
+    handlers: {
+      process: () => [],
+    },
+  });
+
+  assert.deepEqual(
+    dispatcher.dispatchCommand({
+      id: "cmd.unknown-envelope",
+      type: "unknownEnvelopeType",
+    }),
+    [
+      {
+        details: {
+          commandId: "cmd.unknown-envelope",
+          commandType: "unknownEnvelopeType",
+          reason: "unsupported-family:unsupported",
+        },
+        type: "CommandRejected",
+      },
+    ],
+  );
 });
 
 test("rejects unsafe command identifiers before commands enter the queue", () => {

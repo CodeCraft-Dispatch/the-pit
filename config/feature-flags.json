@@ -52,7 +52,7 @@
       "id": "kernel.module.commandDispatcher",
       "kind": "kernel",
       "description": "Enable deterministic command normalization, queue ordering, and module dispatch for process command envelopes.",
-      "default": false,
+      "default": true,
       "exposure": "hidden",
       "persistence": "build",
       "mutableAtRuntime": false,
