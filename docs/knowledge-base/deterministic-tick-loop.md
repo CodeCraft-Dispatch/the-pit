@@ -19,6 +19,9 @@ There are now intentionally separate layers:
   routing.
 - `runtime/kernel/process-state-container.mjs` owns modular process-state records,
   process command application, and process advancement semantics.
+- `runtime/kernel/semantic-event-log.mjs` owns semantic event validation,
+  deterministic sequence allocation, event querying, diagnostics, and event-log
+  snapshots.
 - `runtime/kernel/wasm/tick-loop-core.mjs` is the first real Wasm-facing tick-loop
   slice. It boots a tiny compiler-free WebAssembly module from an immutable
   capability mask and advances a deterministic fixed tick counter when
@@ -30,6 +33,9 @@ There are now intentionally separate layers:
   Wasm-facing process-state container slice. It proves the gated process-state
   container boundary without prematurely moving semantic mutation into raw Wasm
   memory.
+- `runtime/kernel/wasm/semantic-event-log-core.mjs` is the staged Wasm-facing
+  event-log metadata slice. It proves immutable boot capabilities and gated event
+  count metadata without prematurely moving event storage into raw Wasm memory.
 
 That split is deliberate.
 
@@ -50,14 +56,16 @@ command, event, snapshot, and capability boundary.
 The loop owns stable deterministic time semantics rather than browser
 integration, persistence ownership, UI logic, narrative policy, or content
 authoring. Command scheduling and routing are delegated to the command
-dispatcher. Process mutation is delegated to the process state container. Both
-satisfy the same kernel ownership test because they are replay-relevant,
-independent of presentation, expressible through small command/event contracts,
-and intended to become performance-sensitive as authored process counts grow.
+dispatcher. Process mutation is delegated to the process state container.
+Semantic event storage and event queries are delegated to the semantic event log.
+All three satisfy the same kernel ownership test because they are
+replay-relevant, independent of presentation, expressible through small
+command/event contracts, and intended to become performance-sensitive as authored
+process counts grow.
 
 The `.mjs` implementation acts as the executable reference model. The Wasm tick
-core, Wasm command-dispatcher core, and Wasm process-state core act as the first
-ABI proofs and production-kernel stepping stones.
+core, Wasm command-dispatcher core, Wasm process-state core, and Wasm semantic
+event-log core act as the first ABI proofs and production-kernel stepping stones.
 
 ## Runtime placement
 
@@ -68,6 +76,8 @@ ABI proofs and production-kernel stepping stones.
   behind the process-core and command-dispatcher feature flags.
 - Wasm process-state core: minimal boot/process-metadata capability proof behind
   the same process-core feature flag.
+- Wasm semantic-event-log core: minimal boot/event-count metadata proof behind
+  the process-core and semantic-event-log feature flags.
 - Future Wasm process core: fuller production kernel target once command,
   event, snapshot, and replay semantics are stable.
 
@@ -85,24 +95,31 @@ The current reference model honors these capability gates:
 - `kernel.module.commandDispatcher` enables command dispatch when explicitly
   declared. Missing values remain compatible with earlier process-core snapshots,
   while explicit `false` rejects ready commands lawfully.
+- `kernel.module.semanticEventLog` enables deterministic semantic event storage,
+  sequence allocation, event querying, and replayable event-log snapshots.
+  Missing values remain compatible with earlier process-core snapshots, while
+  explicit `false` degrades the trace to an inert stale log.
 - `kernel.module.diagnostics` exposes hidden diagnostics without changing
   simulation truth.
 
-The Wasm tick core, Wasm command-dispatcher core, and Wasm process-state core
-consume narrow integer capability masks derived from the same boot snapshot. They
-expose behavior only when their required capability bits are enabled.
+The Wasm tick core, Wasm command-dispatcher core, Wasm process-state core, and
+Wasm semantic-event-log core consume narrow integer capability masks derived from
+the same boot snapshot. They expose behavior only when their required capability
+bits are enabled.
 
 ## Security posture
 
 The reference model validates all externally supplied identifiers before commands
-enter the dispatcher queue or process records enter the container. Identifiers are
-limited to a small safe character set and bounded length so command IDs and
-process IDs cannot become accidental HTML, path, selector, or diagnostic
-injection payloads in later projections.
+enter the dispatcher queue, process records enter the container, or event drafts
+enter the semantic event log. Identifiers are limited to a small safe character
+set and bounded length so command IDs, process IDs, event types, and event detail
+keys cannot become accidental HTML, path, selector, or diagnostic injection
+payloads in later projections.
 
 The Wasm tick core validates tick deltas, the Wasm command-dispatcher core
-validates queue depth, and the Wasm process-state core validates process counts
-in JavaScript host wrappers before values cross the Wasm boundary.
+validates queue depth, the Wasm process-state core validates process counts, and
+the Wasm semantic-event-log core validates event counts in JavaScript host
+wrappers before values cross the Wasm boundary.
 
 Snapshots are restored only when the schema version and capability snapshot are
 compatible. This prevents replay drift caused by silently changing kernel
@@ -138,8 +155,16 @@ The process-state container slice is covered by executable tests for:
 - fixed-step process advancement and settling;
 - duplicate and unsafe process definition rejection.
 
-The Wasm tick-core, Wasm command-dispatcher-core, and Wasm process-state-core
-slices are covered by executable tests for:
+The semantic-event-log slice is covered by executable tests for:
+
+- deterministic append sequence, tick, and detail ordering;
+- event query cloning;
+- event-log snapshot and restore behavior;
+- unsafe event type and event detail key rejection;
+- explicit disabled-capability inert behavior.
+
+The Wasm tick-core, Wasm command-dispatcher-core, Wasm process-state-core, and
+Wasm semantic-event-log-core slices are covered by executable tests for:
 
 - deriving narrow Wasm capability masks from boot snapshots;
 - booting with immutable capabilities;
@@ -148,6 +173,6 @@ slices are covered by executable tests for:
 - matching the reference model's enabled fixed-step tick count where applicable.
 
 These tests implement the existing fixed-step process core, initial Wasm kernel,
-scheduler/replay, command-dispatcher, process-state container, and boot
-capability snapshot specifications without duplicating behavior across multiple
-specification files.
+scheduler/replay, command-dispatcher, process-state container, semantic event
+log, and boot capability snapshot specifications without duplicating behavior
+across multiple specification files.
