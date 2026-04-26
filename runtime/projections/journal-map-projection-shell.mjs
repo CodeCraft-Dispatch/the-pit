@@ -15,7 +15,7 @@ export const JOURNAL_MAP_PROJECTION_SCHEMA_VERSION = 1;
 
 const PROCESS_NODE_KIND = "process";
 const COMMAND_NODE_KIND = "command";
-const COMMAND_TARGET_EDGE_TYPE = "command-target";
+const COMMAND_TARGET_EDGE_TYPE = "command.target";
 const MAX_SUMMARY_LENGTH = 512;
 
 function cloneJsonValue(value) {
@@ -144,20 +144,23 @@ function normalizeJournalEntry(entry) {
   validateSafeIdentifier(entry.eventType, "journal entry eventType");
   validateProjectionText(entry.summary, "journal entry summary");
 
-  if (entry.processId !== null) {
-    validateSafeIdentifier(entry.processId, "journal entry processId");
+  const processId = entry.processId ?? null;
+  const commandId = entry.commandId ?? null;
+
+  if (processId !== null) {
+    validateSafeIdentifier(processId, "journal entry processId");
   }
 
-  if (entry.commandId !== null) {
-    validateSafeIdentifier(entry.commandId, "journal entry commandId");
+  if (commandId !== null) {
+    validateSafeIdentifier(commandId, "journal entry commandId");
   }
 
   return {
-    commandId: entry.commandId,
+    commandId,
     details: cloneDetails(entry.details ?? {}),
     eventType: entry.eventType,
     id: entry.id,
-    processId: entry.processId,
+    processId,
     sequence: entry.sequence,
     summary: entry.summary,
     tick: entry.tick,
@@ -369,7 +372,9 @@ function normalizeIncomingEvents(events) {
   const normalizedEvents = events.map((event) => {
     const normalized = cloneSemanticEvent(event);
     if (seen.has(normalized.sequence)) {
-      throw new TypeError(`duplicate projection event sequence ${normalized.sequence}`);
+      throw new TypeError(
+        `duplicate projection event sequence ${normalized.sequence}`,
+      );
     }
     seen.add(normalized.sequence);
     return normalized;
