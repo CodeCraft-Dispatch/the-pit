@@ -35,7 +35,11 @@ function assertPlainObject(value, label) {
 }
 
 function validateEventCount(value) {
-  if (!Number.isSafeInteger(value) || value < 0 || value > MAX_I32_EVENT_COUNT) {
+  if (
+    !Number.isSafeInteger(value) ||
+    value < 0 ||
+    value > MAX_I32_EVENT_COUNT
+  ) {
     throw new RangeError(
       `eventCount must be an integer from 0 to ${MAX_I32_EVENT_COUNT}`,
     );
