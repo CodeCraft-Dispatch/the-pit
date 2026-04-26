@@ -13,6 +13,18 @@
       "tags": ["runtime", "foundations"]
     },
     {
+      "id": "engine.projection.journalMap",
+      "kind": "engine",
+      "description": "Enable deterministic journal and semantic map projections over the semantic event log for domain runtime and player-facing surfaces.",
+      "default": true,
+      "exposure": "hidden",
+      "persistence": "build",
+      "mutableAtRuntime": false,
+      "testable": true,
+      "requires": ["kernel.module.semanticEventLog"],
+      "tags": ["runtime", "projection", "journal", "semantic-map"]
+    },
+    {
       "id": "ui.playerSettings.flagsPanel",
       "kind": "ui",
       "description": "Expose a player-safe feature flag panel for profile-backed preferences and experiments.",
