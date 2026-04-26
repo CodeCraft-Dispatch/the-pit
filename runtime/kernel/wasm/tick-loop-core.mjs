@@ -77,6 +77,14 @@ export async function createWasmTickLoopCore(options = {}) {
 
   function advance(tickCount = 1) {
     validateTickDelta(tickCount);
+    const currentTick = getTick();
+
+    if (currentTick > MAX_I32_TICK_DELTA - tickCount) {
+      throw new RangeError(
+        `tickCount would overflow i32 tick counter: ${currentTick} + ${tickCount} > ${MAX_I32_TICK_DELTA}`,
+      );
+    }
+
     const result = tick(tickCount);
 
     if (result === -1) {
