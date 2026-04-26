@@ -1,4 +1,7 @@
-import type { KernelCapabilitySnapshot, KernelSemanticEvent } from "../kernel/semantic-event-log.d.ts";
+import type {
+  KernelCapabilitySnapshot,
+  KernelSemanticEvent,
+} from "../kernel/semantic-event-log.d.ts";
 
 export interface ProjectionJournalEntry {
   id: string;

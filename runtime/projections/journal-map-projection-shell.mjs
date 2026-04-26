@@ -431,7 +431,9 @@ export function createJournalMapProjectionShell(options = {}) {
     }
 
     if (entry.commandId && entry.processId) {
-      recordEdge(createCommandTargetEdge(entry.commandId, entry.processId, event));
+      recordEdge(
+        createCommandTargetEdge(entry.commandId, entry.processId, event),
+      );
     }
   }
 
