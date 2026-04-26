@@ -4,6 +4,9 @@ import type {
   ProcessStateEventDraft,
 } from "./process-state-container.mjs";
 
+export const COMMAND_DISPATCHER_FLAG: "kernel.module.commandDispatcher";
+export const PROCESS_CORE_FLAG: "kernel.wasm.processCore";
+
 export interface KernelCapabilitySnapshot {
   values: Record<string, boolean>;
   provenance?: Record<string, unknown>;
