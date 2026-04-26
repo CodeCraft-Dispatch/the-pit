@@ -15,14 +15,15 @@ It is intentionally opinionated. These notes are not a loose brainstorm dump. Th
 7. `wasm-kernel.md` — deterministic WebAssembly kernel purpose, boundaries, modules, performance stance, and extension rules
 8. `kernel-module-flags.md` — boot-time kernel module flag taxonomy, dependency rules, replay provenance, and testing matrix
 9. `deterministic-tick-loop.md` — executable tick-loop reference model, Wasm target decision, TypeScript host boundary, replay behavior, and security posture
-10. `content-system.md` — DSL and authoring model
-11. `feature-flags.md` — local-first flag taxonomy, resolution, and runtime placement
-12. `persistence-and-replay.md` — save, projections, replay, and migration strategy
-13. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
-14. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
-15. `security-standards.md` — OWASP-aligned security baseline and automation stance
-16. `authoring-roadmap.md` — practical staged build plan
-17. `source-map.md` — how the seeded materials map into this repo
+10. `process-state-container.md` — modular process-state ownership, gated mutation behavior, staged Wasm container boundary, and test contract
+11. `content-system.md` — DSL and authoring model
+12. `feature-flags.md` — local-first flag taxonomy, resolution, and runtime placement
+13. `persistence-and-replay.md` — save, projections, replay, and migration strategy
+14. `engineering-foundations.md` — test-first, mutation-backed, zero-cost engineering doctrine
+15. `delivery-pipeline.md` — staged GitHub and Netlify delivery contract
+16. `security-standards.md` — OWASP-aligned security baseline and automation stance
+17. `authoring-roadmap.md` — practical staged build plan
+18. `source-map.md` — how the seeded materials map into this repo
 
 ## Intended use
 
