@@ -20,6 +20,8 @@ const validCommandTypes = new Set(["openProcess", "setProcessState"]);
 const identifierPattern = /^[A-Za-z0-9._:-]+$/u;
 
 function compareStableStrings(left, right) {
+  // localeCompare can vary across locale/ICU environments, so use direct
+  // code-unit comparison to keep replay and snapshot ordering deterministic.
   if (left < right) {
     return -1;
   }
@@ -363,6 +365,8 @@ export function createDeterministicTickLoop(options = {}) {
   }
 
   function processQueuedCommandsForCurrentTick() {
+    // queuedCommands are kept sorted by compareQueuedCommands, so once we
+    // encounter a targetTick beyond the current tick, the remainder are pending.
     let readyCount = 0;
     while (
       readyCount < queuedCommands.length &&
