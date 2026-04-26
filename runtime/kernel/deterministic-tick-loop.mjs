@@ -9,8 +9,8 @@ import {
   createProcessStateContainer,
   validateNonNegativeInteger,
   validatePositiveInteger,
-  validateSafeIdentifier,
 } from "./process-state-container.mjs";
+import { createSemanticEventLog } from "./semantic-event-log.mjs";
 
 const PROCESS_CORE_FLAG = "kernel.wasm.processCore";
 const DIAGNOSTICS_FLAG = "kernel.module.diagnostics";
@@ -55,36 +55,33 @@ function capabilityDetails(capabilitySnapshot) {
   };
 }
 
-function cloneEventLog(events = []) {
-  return events.map((event) => {
-    assertPlainObject(event, "event");
-    validatePositiveInteger(event.sequence, "event.sequence");
-    validateNonNegativeInteger(event.tick, "event.tick");
-    validateSafeIdentifier(event.type, "event.type");
-
-    return {
-      details: cloneSortedRecord(event.details ?? {}),
-      sequence: event.sequence,
-      tick: event.tick,
-      type: event.type,
-    };
-  });
-}
-
 function compareCapabilityValues(left, right) {
   return JSON.stringify(left.values) === JSON.stringify(right.values);
 }
 
-function createInitialState(options) {
+function createEventLogState(restoredState) {
+  if (restoredState.semanticEventLog) {
+    return restoredState.semanticEventLog;
+  }
+
+  return {
+    eventLog: restoredState.eventLog ?? [],
+    nextSequence: restoredState.nextSequence ?? 1,
+  };
+}
+
+function createInitialState(options, capabilitySnapshot) {
   const restoredState = options.state ?? {};
   assertPlainObject(restoredState, "state");
   const content = options.content ?? { processes: [] };
   assertPlainObject(content, "content");
 
   return {
-    eventLog: cloneEventLog(restoredState.eventLog ?? []),
+    eventLog: createSemanticEventLog({
+      capabilities: capabilitySnapshot,
+      state: createEventLogState(restoredState),
+    }),
     nextCommandOrder: restoredState.nextCommandOrder ?? 1,
-    nextSequence: restoredState.nextSequence ?? 1,
     processContainer: createProcessStateContainer(
       restoredState.processes ?? content.processes,
     ),
@@ -102,9 +99,8 @@ export function createDeterministicTickLoop(options = {}) {
 
   validatePositiveInteger(manifestVersion, "manifestVersion");
 
-  const initialState = createInitialState(options);
+  const initialState = createInitialState(options, capabilitySnapshot);
   validatePositiveInteger(initialState.nextCommandOrder, "nextCommandOrder");
-  validatePositiveInteger(initialState.nextSequence, "nextSequence");
   validateNonNegativeInteger(initialState.tick, "tick");
 
   const processContainer = initialState.processContainer;
@@ -118,12 +114,12 @@ export function createDeterministicTickLoop(options = {}) {
   });
   const eventLog = initialState.eventLog;
   let tick = initialState.tick;
-  let nextSequence = initialState.nextSequence;
   const diagnostics = {
-    eventCount: eventLog.length,
+    eventCount: eventLog.getEventCount(),
     processCount: processContainer.getProcessCount(),
     queueDepth: commandDispatcher.getQueueDepth(),
     rejectedCommandCount: 0,
+    semanticEventLog: eventLog.getDiagnostics(),
     tickCount: tick,
   };
 
@@ -131,48 +127,66 @@ export function createDeterministicTickLoop(options = {}) {
     return capabilitySnapshot.values[flagId] === true;
   }
 
+  function syncEventDiagnostics() {
+    diagnostics.eventCount = eventLog.getEventCount();
+    diagnostics.semanticEventLog = eventLog.getDiagnostics();
+  }
+
   function emit(type, details = {}) {
-    const event = {
-      details: cloneSortedRecord(details),
-      sequence: nextSequence,
-      tick,
-      type,
-    };
-    nextSequence += 1;
-    eventLog.push(event);
-    diagnostics.eventCount = eventLog.length;
+    const event = eventLog.appendEvent(
+      {
+        details,
+        type,
+      },
+      { tick },
+    );
+    syncEventDiagnostics();
     return event;
   }
 
   function emitProcessEvents(events) {
     let rejectedCount = 0;
+    const emittedEvents = [];
     for (const event of events) {
       if (event.type === "CommandRejected") {
         rejectedCount += 1;
       }
-      emit(event.type, event.details);
+      const emitted = emit(event.type, event.details);
+      if (emitted) {
+        emittedEvents.push(emitted);
+      }
     }
-    return rejectedCount;
+    return {
+      emittedEvents,
+      rejectedCount,
+    };
   }
 
   function processQueuedCommandsForCurrentTick() {
     const dispatchedEvents = commandDispatcher.dispatchReadyCommands(tick);
-    diagnostics.rejectedCommandCount += emitProcessEvents(dispatchedEvents);
+    const result = emitProcessEvents(dispatchedEvents);
+    diagnostics.rejectedCommandCount += result.rejectedCount;
     diagnostics.queueDepth = commandDispatcher.getQueueDepth();
+    return result.emittedEvents;
   }
 
   function step() {
     tick += 1;
     diagnostics.tickCount = tick;
 
-    processQueuedCommandsForCurrentTick();
+    const emittedEvents = processQueuedCommandsForCurrentTick();
 
     if (hasCapability(PROCESS_CORE_FLAG)) {
-      emitProcessEvents(processContainer.advanceProcesses());
+      emittedEvents.push(
+        ...emitProcessEvents(processContainer.advanceProcesses()).emittedEvents,
+      );
     }
 
     diagnostics.processCount = processContainer.getProcessCount();
     diagnostics.queueDepth = commandDispatcher.getQueueDepth();
+    syncEventDiagnostics();
+
+    return emittedEvents;
   }
 
   function enqueueCommand(command) {
@@ -190,16 +204,20 @@ export function createDeterministicTickLoop(options = {}) {
       enqueueCommand(command);
     }
 
-    const startSequence = nextSequence;
+    const emittedEvents = [];
     for (let index = 0; index < tickCount; index += 1) {
-      step();
+      emittedEvents.push(...step());
     }
 
-    return eventLog.filter((event) => event.sequence >= startSequence);
+    return emittedEvents;
   }
 
   function getEvents() {
-    return cloneEventLog(eventLog);
+    return eventLog.getEvents();
+  }
+
+  function findEventsByType(type) {
+    return eventLog.findEventsByType(type);
   }
 
   function getProcess(processId) {
@@ -218,16 +236,19 @@ export function createDeterministicTickLoop(options = {}) {
   }
 
   function snapshot() {
+    const semanticEventLog = eventLog.snapshot();
+
     return {
       capabilitySnapshot: capabilityDetails(capabilitySnapshot),
-      eventLog: getEvents(),
+      eventLog: semanticEventLog.events,
       manifestVersion,
       nextCommandOrder: commandDispatcher.getNextCommandOrder(),
-      nextSequence,
+      nextSequence: semanticEventLog.nextSequence,
       processes: processContainer.snapshot(),
       queuedCommands: commandDispatcher.snapshot(),
       schemaVersion: SNAPSHOT_SCHEMA_VERSION,
       seed,
+      semanticEventLog,
       tick,
     };
   }
@@ -235,6 +256,7 @@ export function createDeterministicTickLoop(options = {}) {
   return Object.freeze({
     advance,
     enqueueCommand,
+    findEventsByType,
     getDiagnostics,
     getEvents,
     getProcess,
@@ -274,6 +296,7 @@ export function restoreDeterministicTickLoop(snapshot, options = {}) {
       nextSequence: snapshot.nextSequence,
       processes: snapshot.processes,
       queuedCommands: snapshot.queuedCommands,
+      semanticEventLog: snapshot.semanticEventLog,
       tick: snapshot.tick,
     },
   });
